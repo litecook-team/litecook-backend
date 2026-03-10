@@ -1,0 +1,15 @@
+Django==5.2.11
+djangorestframework==3.16.1
+djangorestframework-simplejwt==5.5.1
+django-cors-headers==4.9.0
+django-filter==25.2
+django-allauth==65.14.3
+dj-rest-auth==7.1.1
+psycopg2-binary==2.9.11
+python-dotenv==1.2.1
+Pillow==12.1.1
+
+# ДЛЯ ШІ АБО ПАРСИНГУ:
+# google-genai==1.65.0
+# beautifulsoup4==4.14.3
+# deep-translator==1.11.4

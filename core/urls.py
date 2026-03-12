@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,6 +28,10 @@ urlpatterns = [
     # АУТЕНТИФІКАЦІЯ (JWT, Логін, Реєстрація, Підтвердження пошти)
     path('api/auth/', include('dj_rest_auth.urls')),
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
+
+    path('api/auth/password/reset/confirm/<uidb64>/<token>/',
+         RedirectView.as_view(url=f"{settings.FRONTEND_URL}/reset-password-confirm/%(uidb64)s/%(token)s/", permanent=False),
+         name='password_reset_confirm'),
 
     # шляхи для соцмереж
     path('api/auth/social/', include('users.urls')),

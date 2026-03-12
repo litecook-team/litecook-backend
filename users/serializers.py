@@ -119,3 +119,9 @@ class CustomPasswordResetConfirmSerializer(PasswordResetConfirmSerializer):
 
         self.user = user
         return attrs
+
+    def save(self, **kwargs):
+        # Надійно зберігаємо новий пароль у базу даних
+        self.user.set_password(self.validated_data['new_password1'])
+        self.user.save()
+        return self.user

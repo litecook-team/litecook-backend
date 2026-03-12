@@ -205,7 +205,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "https://127.0.0.1:5173",
     "https://main.d3iqk0nwopv4wc.amplifyapp.com",
-    # "https://lite-cook.pp.ua/",
+    "https://lite-cook.pp.ua/",
 ]
 # Дозволяємо передавати куки (credentials) для авторизації
 CORS_ALLOW_CREDENTIALS = True
@@ -215,3 +215,8 @@ ACCOUNT_ADAPTER = 'users.adapters.CustomAccountAdapter'
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
 
 ACCOUNT_EMAIL_SUBJECT_PREFIX = ''
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://litecook-backend.duckdns.org",
+    "https://lite-cook.pp.ua",
+]

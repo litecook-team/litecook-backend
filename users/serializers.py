@@ -8,9 +8,12 @@ from django.conf import settings
 
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
+from django.utils.encoding import force_bytes, force_str
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+
+from dj_rest_auth.serializers import PasswordResetConfirmSerializer
+from django.utils.http import urlsafe_base64_decode
 
 
 class CustomRegisterSerializer(RegisterSerializer):
@@ -85,3 +88,34 @@ class CustomPasswordResetSerializer(PasswordResetSerializer):
             )
             msg.attach_alternative(html_content, "text/html")
             msg.send()
+
+class CustomPasswordResetConfirmSerializer(PasswordResetConfirmSerializer):
+    def validate(self, attrs):
+        uid = attrs.get('uid')
+        token = attrs.get('token')
+
+        # 1. Безпечно розшифровуємо ID користувача
+        try:
+            uid_decoded = force_str(urlsafe_base64_decode(uid))
+            user = CustomUser.objects.get(pk=uid_decoded)
+        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+            raise serializers.ValidationError({"uid": ["Недійсне посилання або користувач не існує."]})
+
+        # 2. Перевіряємо, чи токен ще дійсний
+        if not default_token_generator.check_token(user, token):
+            raise serializers.ValidationError({"token": ["Посилання застаріло або вже було використане. Надішліть новий запит."]})
+
+        # 3. Перевіряємо, чи співпадають паролі
+        if attrs.get('new_password1') != attrs.get('new_password2'):
+            raise serializers.ValidationError({"non_field_errors": ["Паролі не співпадають."]})
+
+        # 4. Перевіряємо надійність пароля (щоб не був "12345678" чи схожим на email)
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        try:
+            validate_password(attrs['new_password1'], user)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError({"new_password1": list(e.messages)})
+
+        self.user = user
+        return attrs

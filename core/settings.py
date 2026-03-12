@@ -175,6 +175,7 @@ REST_AUTH = {
     'LOGIN_SERIALIZER': 'users.serializers.CustomLoginSerializer',
     'USER_DETAILS_SERIALIZER': 'users.serializers.CustomUserDetailsSerializer',
     'PASSWORD_RESET_SERIALIZER': 'users.serializers.CustomPasswordResetSerializer',
+    'PASSWORD_RESET_CONFIRM_SERIALIZER': 'users.serializers.CustomPasswordResetConfirmSerializer',
 }
 
 # Вимикаємо username, використовуємо email

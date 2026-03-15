@@ -206,7 +206,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "https://127.0.0.1:5173",
     "https://main.d3iqk0nwopv4wc.amplifyapp.com",
-    "https://lite-cook.pp.ua/",
+    "https://lite-cook.pp.ua",
 ]
 # Дозволяємо передавати куки (credentials) для авторизації
 CORS_ALLOW_CREDENTIALS = True

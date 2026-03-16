@@ -215,6 +215,8 @@ ACCOUNT_ADAPTER = 'users.adapters.CustomAccountAdapter'
 
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
 
+ADMIN_URL = os.environ.get('ADMIN_URL', 'admin/')
+
 ACCOUNT_EMAIL_SUBJECT_PREFIX = ''
 
 CSRF_TRUSTED_ORIGINS = [

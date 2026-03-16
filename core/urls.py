@@ -19,10 +19,13 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
+from django.views.generic import TemplateView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    # Всі запити, що починаються з /api/recipes/, підуть у наш додаток
+    path('', TemplateView.as_view(template_name='warning.html'), name='home-warning'),
+    path('admin/', TemplateView.as_view(template_name='warning.html')),
+    path(settings.ADMIN_URL, admin.site.urls),
+
     path('api/recipes/', include('recipes.urls')),
 
     # АУТЕНТИФІКАЦІЯ (JWT, Логін, Реєстрація, Підтвердження пошти)

@@ -16,6 +16,13 @@
             margin: 0;
             overflow: hidden;
             user-select: none;
+            transition: background-color 0.5s;
+        }
+
+        /* Стиль для моменту "блокування" */
+        body.locked {
+            background-color: #aa0000;
+            color: #ffffff;
         }
 
         .scanline {
@@ -45,10 +52,12 @@
             animation: pulse 2s infinite;
         }
 
-        @keyframes pulse {
-            0% { box-shadow: 0 0 30px rgba(255, 0, 0, 0.4), inset 0 0 20px rgba(255, 0, 0, 0.2); }
-            50% { box-shadow: 0 0 50px rgba(255, 0, 0, 0.8), inset 0 0 30px rgba(255, 0, 0, 0.4); }
-            100% { box-shadow: 0 0 30px rgba(255, 0, 0, 0.4), inset 0 0 20px rgba(255, 0, 0, 0.2); }
+        /* Прибираємо тіні при "блокуванні" */
+        body.locked .warning-container {
+            border-color: #fff;
+            background: transparent;
+            box-shadow: none;
+            animation: none;
         }
 
         h1 {
@@ -83,27 +92,89 @@
             padding-top: 20px;
         }
 
-        .ip-address {
+        /* Стиль для нашого страшного таймера */
+        #countdown-container {
+            margin-top: 25px;
+            padding: 15px;
+            border: 1px solid #ff3333;
+            background: rgba(255, 0, 0, 0.1);
+            font-size: 1.5rem;
             color: #fff;
-            background: #ff3333;
-            padding: 2px 8px;
-            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        #timer {
+            font-size: 2.5rem;
+            display: block;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="scanline"></div>
-    <div class="warning-container">
+    <div class="scanline" id="scanline"></div>
+    <div class="warning-container" id="main-content">
         <h1 class="blink">⚠ СИСТЕМА БЕЗПЕКИ ⚠</h1>
         <p>КРИТИЧНА ПОМИЛКА: НЕСАНКЦІОНОВАНИЙ ДОСТУП</p>
         <p>Цей сервер призначений виключно для API-запитів системи LITE cook.</p>
         <p>Ваша IP-адреса та цифрові ідентифікатори пристрою були успішно зафіксовані.</p>
-        <p class="blink" style="margin-top: 25px; color: #fff;">НЕГАЙНО ПОКИНЬТЕ ЦЮ СТОРІНКУ.</p>
+
+        <div id="countdown-container" class="blink">
+            УВАГА! ІНІЦІЙОВАНО ПРОТОКОЛ ЗАХИСТУ.<br>
+            Ваш пристрій буде заблоковано через:
+            <span id="timer">10</span>
+        </div>
 
         <div class="system-info">
             > Фіксація з'єднання: УСПІШНО<br>
-            > Статус блокування пристрою: <span class="blink">В ОЧІКУВАННІ...</span>
+            > Статус: <span id="status-text" class="blink">АКТИВАЦІЯ БЛОКУВАННЯ...</span>
         </div>
     </div>
+
+<script>
+        // Скрипт для зворотного відліку
+        let timeLeft = 10;
+        const timerElement = document.getElementById('timer');
+        const bodyElement = document.body;
+        const mainContent = document.getElementById('main-content');
+        const scanline = document.getElementById('scanline');
+
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerElement.textContent = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                executeLockdown();
+            }
+        }, 1000);
+
+        function executeLockdown() {
+            // 1. Змінюємо стиль всієї сторінки (червоний екран)
+            bodyElement.classList.add('locked');
+            scanline.style.display = 'none';
+
+            // Замінюємо весь контент на повідомлення про блокування
+            mainContent.innerHTML = `
+                <h1 style="font-size: 5rem; text-shadow: none;">СИСТЕМУ ЗАБЛОКОВАНО</h1>
+                <p style="font-size: 2rem;">З'ЄДНАННЯ ОБІРВАНО.</p>
+                <p style="font-size: 1.5rem; margin-top: 30px;">Ідентифікатори відправлено адміністратору.</p>
+            `;
+
+            // 2. Блокуємо спроби оновити сторінку або повернутися назад
+            window.onbeforeunload = function() {
+                return "СИСТЕМУ ЗАБЛОКОВАНО. ВИХІД ЗАБОРОНЕНО.";
+            };
+
+            // 3. Робимо паузу 100 мілісекунд, щоб браузер встиг показати червоний екран,
+            // а потім НАМЕРТВО ВІШАЄМО ВЛАДКУ нескінченним циклом.
+            setTimeout(() => {
+                while (true) {
+                    // Цей цикл ніколи не зупиниться.
+                    // Він "з'їсть" всі ресурси вкладки, і вона перестане реагувати.
+                    history.pushState(0, 0, location.href); // Спамимо історію браузера, щоб кнопка "Назад" зламалася
+                }
+            }, 100);
+        }
+    </script>
 </body>
 </html>

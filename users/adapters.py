@@ -22,6 +22,7 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         # Передаємо посилання в наш HTML-шаблон
         context = {
             'activate_url': activate_url,
+            'frontend_url': settings.FRONTEND_URL,
         }
 
         # Рендеримо HTML

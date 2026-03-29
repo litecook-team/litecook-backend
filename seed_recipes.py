@@ -32,7 +32,7 @@ RECIPES_DATA = [
             ("Полуниця", 50, UnitChoice.G),
             ("Чорниця", 50, UnitChoice.G),
             ("Мед", 1, UnitChoice.TSP),
-            ("Волоські горіхи", 20, UnitChoice.G),
+            ("Волоський горіх", 20, UnitChoice.G), # Виправлено
         ],
         "steps": [
             "Доведіть мигдальне молоко до кипіння.",
@@ -61,7 +61,8 @@ RECIPES_DATA = [
             ("Оливкова олія", 2, UnitChoice.TBSP),
             ("Часник", 2, UnitChoice.CLOVE),
             ("Орегано", 1, UnitChoice.TSP),
-            ("Сіль, перець", None, UnitChoice.TASTE),
+            ("Сіль", None, UnitChoice.TASTE), # Розділено
+            ("Чорний перець", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Наріжте овочі великими шматками.",
@@ -88,7 +89,8 @@ RECIPES_DATA = [
             ("Оливкова олія", 2, UnitChoice.TBSP),
             ("Часник", 2, UnitChoice.CLOVE),
             ("Петрушка", 10, UnitChoice.G),
-            ("Сіль, перець", None, UnitChoice.TASTE),
+            ("Сіль", None, UnitChoice.TASTE), # Розділено
+            ("Чорний перець", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Натріть курку сіллю та перцем.",
@@ -118,7 +120,8 @@ RECIPES_DATA = [
             ("Листя салату", 50, UnitChoice.G),
             ("Оливкова олія", 2, UnitChoice.TBSP),
             ("Лимонний сік", 1, UnitChoice.TBSP),
-            ("Сіль, перець", None, UnitChoice.TASTE),
+            ("Сіль", None, UnitChoice.TASTE), # Розділено
+            ("Чорний перець", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Промийте кіноа та відваріть у підсоленій воді приблизно 15 хвилин, охолодіть.",
@@ -166,13 +169,14 @@ RECIPES_DATA = [
         "dietary_tags": [Diet.VEGAN],
         "dish_types": [DishType.SOUP],
         "ingredients": [
-            ("Помідори", 400, UnitChoice.G),
-            ("Цибуля", 1, UnitChoice.PCS),
+            ("Помідор", 400, UnitChoice.G), # Виправлено
+            ("Цибуля ріпчаста", 1, UnitChoice.PCS), # Виправлено
             ("Часник", 2, UnitChoice.CLOVE),
             ("Базилік", 10, UnitChoice.G),
             ("Оливкова олія", 1, UnitChoice.TBSP),
             ("Овочевий бульйон", 400, UnitChoice.ML),
-            ("Сіль, перець", None, UnitChoice.TASTE),
+            ("Сіль", None, UnitChoice.TASTE), # Розділено
+            ("Чорний перець", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Наріжте цибулю та часник і обсмажте на оливковій олії.",
@@ -198,7 +202,8 @@ RECIPES_DATA = [
             ("Часник", 2, UnitChoice.CLOVE),
             ("Оливкова олія", 2, UnitChoice.TBSP),
             ("Петрушка", 10, UnitChoice.G),
-            ("Сіль, перець", None, UnitChoice.TASTE),
+            ("Сіль", None, UnitChoice.TASTE), # Розділено
+            ("Чорний перець", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Відваріть пасту до готовності.",
@@ -223,7 +228,7 @@ RECIPES_DATA = [
             ("Авокадо", 2, UnitChoice.PCS),
             ("Лайм", 1, UnitChoice.PCS),
             ("Помідор", 1, UnitChoice.PCS),
-            ("Червона цибуля", 0.5, UnitChoice.PCS),
+            ("Цибуля червона", 0.5, UnitChoice.PCS), # Виправлено
             ("Кінза", 5, UnitChoice.G),
             ("Сіль", None, UnitChoice.TASTE),
         ],
@@ -252,7 +257,8 @@ RECIPES_DATA = [
             ("Кабачок", 1, UnitChoice.PCS),
             ("Лимон", 0.5, UnitChoice.PCS),
             ("Оливкова олія", 1, UnitChoice.TBSP),
-            ("Сіль, перець", None, UnitChoice.TASTE),
+            ("Сіль", None, UnitChoice.TASTE), # Розділено
+            ("Чорний перець", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Наріжте овочі.",
@@ -276,11 +282,12 @@ RECIPES_DATA = [
         "ingredients": [
             ("Нут", 150, UnitChoice.G),
             ("Огірок", 1, UnitChoice.PCS),
-            ("Помідори", 2, UnitChoice.PCS),
+            ("Помідор", 2, UnitChoice.PCS), # Виправлено
             ("Петрушка", 10, UnitChoice.G),
             ("Лимонний сік", 1, UnitChoice.TBSP),
             ("Оливкова олія", 1, UnitChoice.TBSP),
-            ("Сіль, перець", None, UnitChoice.TASTE),
+            ("Сіль", None, UnitChoice.TASTE), # Розділено
+            ("Чорний перець", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Відваріть нут або використайте готовий.",

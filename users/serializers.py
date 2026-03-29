@@ -2,7 +2,7 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 from rest_framework import serializers
 from dj_rest_auth.serializers import LoginSerializer
 from dj_rest_auth.serializers import UserDetailsSerializer
-from users.models import CustomUser
+from .models import CustomUser, UserIngredient
 from dj_rest_auth.serializers import PasswordResetSerializer
 from django.conf import settings
 
@@ -46,13 +46,33 @@ class CustomLoginSerializer(LoginSerializer):
     # Примусово прибираємо поле username з форми входу
     username = None
 
+class UserIngredientSerializer(serializers.ModelSerializer):
+    ingredient_name = serializers.ReadOnlyField(source='ingredient.name')
+    ingredient_image = serializers.ImageField(source='ingredient.image', read_only=True)
+    # Зручне форматування дат (віддає рядок типу "2026-03-24 22:41")
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M", read_only=True)
+    updated_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M", read_only=True)
+
+    class Meta:
+        model = UserIngredient
+        fields = ('id', 'ingredient', 'ingredient_name', 'ingredient_image', 'amount', 'unit', 'created_at', 'updated_at')
+
 class CustomUserDetailsSerializer(UserDetailsSerializer):
+    # кастомне поле для лічильника
+    favorites_count = serializers.SerializerMethodField()
+    # поле для інвентарю
+    inventory = UserIngredientSerializer(many=True, read_only=True)
+
     class Meta(UserDetailsSerializer.Meta):
         model = CustomUser
-        # Додали is_staff та is_superuser, щоб фронтенд розумів ролі
-        fields = ('pk', 'email', 'first_name', 'avatar', 'dietary_preferences', 'allergies', 'favorite_cuisines', 'is_staff', 'is_superuser')
-        # Робимо їх read_only, щоб хакери не могли самі собі призначити адмінку через API
-        read_only_fields = ('email', 'is_staff', 'is_superuser')
+        fields = ('pk', 'email', 'first_name', 'avatar', 'dietary_preferences', 'allergies', 'favorite_cuisines',
+                  'is_staff', 'is_superuser', 'favorites_count', 'inventory')
+        read_only_fields = ('email', 'is_staff', 'is_superuser', 'favorites_count', 'inventory')
+
+    # Метод, який рахує кількість улюблених рецептів
+    def get_favorites_count(self, obj):
+        # Звертаємося до related_name 'favorites' з моделі FavoriteRecipe
+        return obj.favorites.count()
 
 
 class CustomPasswordResetSerializer(PasswordResetSerializer):

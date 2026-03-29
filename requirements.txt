@@ -10,6 +10,7 @@ python-dotenv==1.2.1
 Pillow==12.1.1
 requests==2.32.5
 cryptography==46.0.5
+unidecode==1.4.0
 
 # ДЛЯ ШІ АБО ПАРСИНГУ:
 # google-genai==1.65.0

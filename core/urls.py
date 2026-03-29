@@ -26,7 +26,7 @@ urlpatterns = [
     path('admin/', TemplateView.as_view(template_name='warning.html')),
     path(settings.ADMIN_URL, admin.site.urls),
 
-    path('api/recipes/', include('recipes.urls')),
+    path('api/', include('recipes.urls')),
 
     # АУТЕНТИФІКАЦІЯ (JWT, Логін, Реєстрація, Підтвердження пошти)
     path('api/auth/', include('dj_rest_auth.urls')),

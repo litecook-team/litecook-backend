@@ -4,7 +4,9 @@ from django.dispatch import receiver
 from allauth.account.signals import email_confirmed
 from django.db.models.signals import post_save
 from allauth.account.models import EmailAddress
+from django.contrib.postgres.fields import ArrayField
 
+from recipes.models.recipe import Diet, Cuisine, UnitChoice
 
 class CustomUserManager(BaseUserManager):
     """Кастомний менеджер для створення користувачів за email"""
@@ -27,21 +29,24 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractUser):
     # Видаляємо логін, бо він нам не потрібен
     username = None
-
-    # Робимо email головним полем для авторизації
     email = models.EmailField(unique=True, verbose_name='Email')
-
-    # використовуємо стандартне поле для "Ім'я" з макетів і робимо його обов'язковим
     first_name = models.CharField(max_length=150, verbose_name='Ім\'я')
 
-    # Поле згідно з ТЗ
-    dietary_preferences = models.CharField(max_length=255, blank=True, null=True, verbose_name="Дієтичні обмеження")
     # Прапорець для перевірки, чи підтвердив юзер пошту
     is_email_verified = models.BooleanField(default=False, verbose_name="Email підтверджено")
-
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, verbose_name='Аватар')
-    allergies = models.CharField(max_length=255, blank=True, null=True, verbose_name="Алергії (через кому)")
-    favorite_cuisines = models.CharField(max_length=255, blank=True, null=True, verbose_name="Улюблені кухні")
+    allergies = models.ManyToManyField('recipes.Ingredient', blank=True, verbose_name="Алергії на інгредієнти")
+
+    dietary_preferences = ArrayField(
+        models.CharField(max_length=30, choices=Diet.choices),
+        blank=True, null=True,
+        verbose_name="Дієтичні обмеження"
+    )
+    favorite_cuisines = ArrayField(
+        models.CharField(max_length=50, choices=Cuisine.choices),
+        blank=True, null=True,
+        verbose_name="Улюблені кухні"
+    )
 
     USERNAME_FIELD = 'email'
     # Вказуємо, що при створенні адміна через консоль, система має запитати Ім'я
@@ -77,3 +82,30 @@ def auto_verify_superuser(sender, instance, created, **kwargs):
         if not instance.is_email_verified:
             instance.is_email_verified = True
             instance.save(update_fields=['is_email_verified'])
+
+
+class UserIngredient(models.Model):
+    """Модель для зберігання інгредієнтів, які є у користувача вдома (Інвентар/Холодильник)"""
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='inventory', verbose_name="Користувач")
+    ingredient = models.ForeignKey('recipes.Ingredient', on_delete=models.CASCADE, verbose_name="Інгредієнт")
+
+    amount = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Кількість")
+    unit = models.CharField(max_length=20, choices=UnitChoice.choices, default=UnitChoice.G,
+                            verbose_name="Одиниця виміру")
+
+    # ================= Метадані часу =================
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Додано у холодильник")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Останнє оновлення кількості")
+
+    class Meta:
+        verbose_name = "Мій інгредієнт"
+        verbose_name_plural = "Інвентар користувачів"
+        unique_together = ('user', 'ingredient')
+        # продукти, кількість яких юзер оновив найсвіжіше, будуть зверху
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        if self.amount is not None:
+            clean_amount = self.amount.normalize()
+            return f"{self.ingredient.name} - {clean_amount} {self.get_unit_display()}"
+        return f"{self.ingredient.name} - {self.get_unit_display()}"

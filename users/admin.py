@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import CustomUser
+from .models import CustomUser, UserIngredient
+
+class UserIngredientInline(admin.TabularInline):
+    model = UserIngredient
+    extra = 1
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
@@ -8,6 +12,9 @@ class CustomUserAdmin(admin.ModelAdmin):
     search_fields = ('email', 'first_name')
     list_filter = ('is_staff', 'is_superuser')
     filter_horizontal = ('groups', 'user_permissions')
+
+    # Підключаємо інвентар до сторінки юзера
+    inlines = [UserIngredientInline]
 
     # 1. ЗАХИСТ ВІДОБРАЖЕННЯ: Звичайні адміни не будуть бачити Суперадмінів у списку взагалі
     def get_queryset(self, request):

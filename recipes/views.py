@@ -3,6 +3,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Count, Sum, Q
 
+from django.core.mail import EmailMessage
+
+
 # Імпортуємо інструменти для кастомної фільтрації
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, CharFilter, NumberFilter, MultipleChoiceFilter
 import random
@@ -33,10 +36,30 @@ class RecipeFilter(FilterSet):
     meal_times = CharFilter(method='filter_array_overlap', field_name='meal_times')
     dietary_tags = CharFilter(method='filter_array_overlap', field_name='dietary_tags')
     dish_types = CharFilter(method='filter_array_overlap', field_name='dish_types')
+    # Реєстрація кастомного поля для пошуку
+    search_query = CharFilter(method='filter_search_query')
 
     class Meta:
         model = Recipe
         fields = ['is_seasonal']
+
+    # Метод обробки нашого розумного пошуку
+    def filter_search_query(self, queryset, name, value):
+        if not value:
+            return queryset
+
+        # Якщо є кома, розбиваємо по комі. Якщо ні - по пробілу.
+        if ',' in value:
+            terms = [t.strip() for t in value.split(',') if t.strip()]
+        else:
+            terms = [t.strip() for t in value.split() if t.strip()]
+
+        for term in terms:
+            # Ланцюжок фільтрів гарантує, що в рецепті є ВСІ введені інгредієнти
+            queryset = queryset.filter(
+                Q(title__icontains=term) | Q(ingredients__name__icontains=term)
+            )
+        return queryset.distinct()
 
     def filter_by_ingredients(self, queryset, name, value):
         """ Шукає рецепти, які містять ВСІ обрані інгредієнти (І те, І те) """
@@ -205,7 +228,8 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
         raw_required = menus.values(
             'recipe__recipe_ingredients__ingredient_id',
             'recipe__recipe_ingredients__ingredient__name',
-            'recipe__recipe_ingredients__unit'
+            'recipe__recipe_ingredients__unit',
+            'recipe__recipe_ingredients__ingredient__image'
         ).annotate(
             total_required=Sum('recipe__recipe_ingredients__amount')
         )
@@ -218,6 +242,7 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
 
             ing_name = req['recipe__recipe_ingredients__ingredient__name']
             unit = req['recipe__recipe_ingredients__unit']
+            image = req['recipe__recipe_ingredients__ingredient__image']
             amount = req['total_required']
 
             if amount is None:
@@ -226,13 +251,12 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
                 amount = float(amount)
 
             if unit == 'kg':
-                unit = 'g'
-                amount *= 1000
+                unit, amount = 'g', amount * 1000
             elif unit == 'l':
-                unit = 'ml'
-                amount *= 1000
+                unit, amount = 'ml', amount * 1000
 
-            key = (ing_id, ing_name, unit)
+            # Додали картинку у ключ групування
+            key = (ing_id, ing_name, unit, image)
             if key not in merged_requirements:
                 merged_requirements[key] = amount
             else:
@@ -243,36 +267,24 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
         for item in user_inventory:
             unit = item.unit
             amount = float(item.amount) if item.amount else 0
-
             if unit == 'kg':
-                unit = 'g'
-                amount *= 1000
+                unit, amount = 'g', amount * 1000
             elif unit == 'l':
-                unit = 'ml'
-                amount *= 1000
-
+                unit, amount = 'ml', amount * 1000
             key = (item.ingredient_id, unit)
             inventory_dict[key] = inventory_dict.get(key, 0) + amount
 
         final_list = []
-        for (ing_id, ing_name, unit), total_req in merged_requirements.items():
-            # ГОЛОВНА ЗМІНА: Якщо use_fridge == False, ми ігноруємо холодильник (беремо 0)
+        for (ing_id, ing_name, unit, image), total_req in merged_requirements.items():
             have_amount = inventory_dict.get((ing_id, unit), 0) if use_fridge else 0
+            to_buy_base = max(0, total_req - have_amount)
 
-            to_buy_base = total_req - have_amount
-            if to_buy_base < 0:
-                to_buy_base = 0
+            display_amount, display_unit = to_buy_base, unit
 
-            display_amount = to_buy_base
-            display_unit = unit
-
-            # Конвертація відбувається вже на базі правильного to_buy_base
             if unit == 'g' and display_amount >= 1000:
-                display_amount = display_amount / 1000.0
-                display_unit = 'kg'
+                display_amount, display_unit = display_amount / 1000.0, 'kg'
             elif unit == 'ml' and display_amount >= 1000:
-                display_amount = display_amount / 1000.0
-                display_unit = 'l'
+                display_amount, display_unit = display_amount / 1000.0, 'l'
 
             if display_amount == int(display_amount):
                 display_amount = int(display_amount)
@@ -282,6 +294,7 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
             final_list.append({
                 'ingredient_id': ing_id,
                 'ingredient_name': ing_name,
+                'ingredient_image': f"/media/{image}" if image else None,  # Віддаємо шлях до картинки
                 'unit': display_unit,
                 'required_amount': total_req,
                 'already_have': have_amount,
@@ -290,14 +303,28 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
                 '_sort_weight': to_buy_base
             })
 
-        # Тепер сортування завжди буде ідеальним, адже _sort_weight підлаштовується під тогл!
         final_list.sort(key=lambda x: (x['_sort_weight'] > 0, x['_sort_weight']), reverse=True)
-
-        for item in final_list:
-            item.pop('_sort_weight', None)
+        for item in final_list: item.pop('_sort_weight', None)
 
         return Response(final_list)
 
+    @action(detail=False, methods=['post'])
+    def email_pdf(self, request):
+        email = request.data.get('email')
+        pdf_file = request.FILES.get('pdf_file')
+
+        if not email or not pdf_file:
+            return Response({"error": "Email та файл обов'язкові"}, status=400)
+
+        mail = EmailMessage(
+            "Список продуктів | LITE cook",
+            "Привіт! Надсилаємо ваш красивий список продуктів у прикріпленому PDF-файлі. Зручних та смачних покупок!",
+            to=[email]
+        )
+        mail.attach(pdf_file.name, pdf_file.read(), 'application/pdf')
+        mail.send()
+
+        return Response({"message": "Відправлено на пошту!"})
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-

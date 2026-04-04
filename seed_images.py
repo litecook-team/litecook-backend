@@ -29,30 +29,44 @@ def run():
         if ingredient.image:
             continue
 
-        # Шукаємо файл з назвою інгредієнта та одним із розширень
-        for ext in extensions:
-            # 1. Локальна назва
-            file_name_local = f"{ingredient.name}{ext}"
-            file_path = os.path.join(images_dir, file_name_local)
+        # Генеруємо можливі варіанти назв файлів
+        search_names = [ingredient.name]
 
-            if os.path.exists(file_path):
-                # 2. БЕЗПЕЧНА НАЗВА ДЛЯ БАЗИ
-                safe_name = slugify(unidecode(ingredient.name))
-                file_name_db = f"{safe_name}{ext}"
+        # 1. Заміна апострофа на підкреслення (М'ята -> М_ята, Кеш'ю -> Кеш_ю)
+        if "'" in ingredient.name or "’" in ingredient.name:
+            search_names.append(ingredient.name.replace("'", "_").replace("’", "_"))
 
-                media_path = f'ingredients/images/{file_name_db}'
-                if default_storage.exists(media_path):
-                    default_storage.delete(media_path)
+        image_found = False
 
-                with open(file_path, 'rb') as f:
-                    # Зберігаємо під новою англійською назвою
-                    ingredient.image.save(file_name_db, File(f), save=True)
+        # Шукаємо файл за всіма можливими назвами та розширеннями
+        for search_name in search_names:
+            if image_found:
+                break
 
-                print(f"✅ Додано фото для: {ingredient.name} -> {file_name_db}")
-                updated_count += 1
-                break   # Зупиняємо пошук інших форматів для цього інгредієнта
+            for ext in extensions:
+                file_name_local = f"{search_name}{ext}"
+                file_path = os.path.join(images_dir, file_name_local)
+
+                if os.path.exists(file_path):
+                    # БЕЗПЕЧНА НАЗВА ДЛЯ БАЗИ
+                    safe_name = slugify(unidecode(ingredient.name))
+                    file_name_db = f"{safe_name}{ext}"
+
+                    media_path = f'ingredients/images/{file_name_db}'
+                    if default_storage.exists(media_path):
+                        default_storage.delete(media_path)
+
+                    with open(file_path, 'rb') as f:
+                        # Зберігаємо під новою англійською назвою
+                        ingredient.image.save(file_name_db, File(f), save=True)
+
+                    print(f"✅ Додано фото: {file_name_local} -> {file_name_db}")
+                    updated_count += 1
+                    image_found = True
+                    break  # Зупиняємо пошук інших форматів для цього файлу
 
     print(f"\n🎉 Готово! Успішно додано зображень: {updated_count}")
+
 
 if __name__ == '__main__':
     run()

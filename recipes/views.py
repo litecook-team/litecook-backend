@@ -244,7 +244,6 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def shopping_list(self, request):
         day = request.query_params.get('day_of_week')
-        # Читаємо параметр з фронтенду (за замовчуванням True)
         use_fridge = request.query_params.get('use_fridge', 'true').lower() == 'true'
 
         menus = self.get_queryset()
@@ -263,6 +262,31 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
             total_required=Sum('recipe__recipe_ingredients__amount')
         )
 
+        # =========================================================
+        # РОЗУМНИЙ КОНВЕРТЕР ОДИНИЦЬ ВИМІРУ
+        # =========================================================
+        def normalize_unit(amount, unit):
+            # Якщо кількість не вказана (наприклад, "за смаком")
+            if amount is None:
+                return None, unit
+
+            amount = float(amount)
+            # 1. Вагові одиниці
+            if unit == 'kg': return amount * 1000, 'g'
+
+            # 2. Об'ємні одиниці (зводимо до мілілітрів)
+            if unit == 'l': return amount * 1000, 'ml'
+            if unit == 'glass': return amount * 200, 'ml'  # 1 склянка ≈ 200 мл
+            if unit == 'tbsp': return amount * 15, 'ml'  # 1 ст. л. ≈ 15 мл
+            if unit == 'tsp': return amount * 5, 'ml'  # 1 ч. л. ≈ 5 мл
+            if unit == 'drop': return amount * 0.05, 'ml'  # 1 крапля ≈ 0.05 мл
+
+            # 3. Інші (pcs, pack, can, clove, pinch, bunch, taste тощо)
+            # Залишаємо як є, їх математично перевести в грами без втрати логіки неможливо
+            return amount, unit
+
+        # =========================================================
+
         merged_requirements = {}
         for req in raw_required:
             ing_id = req['recipe__recipe_ingredients__ingredient_id']
@@ -270,68 +294,78 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
                 continue
 
             ing_name = req['recipe__recipe_ingredients__ingredient__name']
-            unit = req['recipe__recipe_ingredients__unit']
             image = req['recipe__recipe_ingredients__ingredient__image']
-            amount = req['total_required']
 
-            if amount is None:
-                amount = 0
-            else:
-                amount = float(amount)
+            # Нормалізуємо кількість і одиницю для РЕЦЕПТУ
+            amount, unit = normalize_unit(req['total_required'], req['recipe__recipe_ingredients__unit'])
 
-            if unit == 'kg':
-                unit, amount = 'g', amount * 1000
-            elif unit == 'l':
-                unit, amount = 'ml', amount * 1000
-
-            # Додали картинку у ключ групування
             key = (ing_id, ing_name, unit, image)
             if key not in merged_requirements:
                 merged_requirements[key] = amount
             else:
-                merged_requirements[key] += amount
+                if amount is not None and merged_requirements[key] is not None:
+                    merged_requirements[key] += amount
 
         user_inventory = UserIngredient.objects.filter(user=request.user)
         inventory_dict = {}
         for item in user_inventory:
-            unit = item.unit
-            amount = float(item.amount) if item.amount else 0
-            if unit == 'kg':
-                unit, amount = 'g', amount * 1000
-            elif unit == 'l':
-                unit, amount = 'ml', amount * 1000
-            key = (item.ingredient_id, unit)
-            inventory_dict[key] = inventory_dict.get(key, 0) + amount
+            # Нормалізуємо кількість і одиницю для ХОЛОДИЛЬНИКА
+            amount, unit = normalize_unit(item.amount, item.unit)
+            if amount is not None:
+                key = (item.ingredient_id, unit)
+                inventory_dict[key] = inventory_dict.get(key, 0) + amount
 
         final_list = []
         for (ing_id, ing_name, unit, image), total_req in merged_requirements.items():
-            have_amount = inventory_dict.get((ing_id, unit), 0) if use_fridge else 0
-            to_buy_base = max(0, total_req - have_amount)
 
-            display_amount, display_unit = to_buy_base, unit
+            have_amount = 0
+            if use_fridge:
+                # Шукаємо точний збіг (наприклад, pcs і pcs, або ml і ml)
+                if (ing_id, unit) in inventory_dict:
+                    have_amount = inventory_dict[(ing_id, unit)]
+                # КУЛІНАРНА МАГІЯ: Якщо рецепт просить об'єм (ml), а в холодильнику вага (g) - прирівнюємо 1 до 1
+                elif unit == 'ml' and (ing_id, 'g') in inventory_dict:
+                    have_amount = inventory_dict[(ing_id, 'g')]
+                # І навпаки: якщо рецепт просить грами, а в холодильнику мілілітри
+                elif unit == 'g' and (ing_id, 'ml') in inventory_dict:
+                    have_amount = inventory_dict[(ing_id, 'ml')]
 
-            if unit == 'g' and display_amount >= 1000:
-                display_amount, display_unit = display_amount / 1000.0, 'kg'
-            elif unit == 'ml' and display_amount >= 1000:
-                display_amount, display_unit = display_amount / 1000.0, 'l'
-
-            if display_amount == int(display_amount):
-                display_amount = int(display_amount)
+            # Якщо кількість "За смаком" (None)
+            if total_req is None:
+                to_buy_base = 0
+                display_amount = None
             else:
-                display_amount = round(display_amount, 2)
+                to_buy_base = max(0, total_req - have_amount)
+                display_amount = to_buy_base
+
+            display_unit = unit
+
+            # Зворотна конвертація для красивого виводу (якщо вийшло більше 1000 г, покажемо в кг)
+            if display_amount is not None and display_amount > 0:
+                if unit == 'g' and display_amount >= 1000:
+                    display_amount, display_unit = display_amount / 1000.0, 'kg'
+                elif unit == 'ml' and display_amount >= 1000:
+                    display_amount, display_unit = display_amount / 1000.0, 'l'
+
+                # Прибираємо зайві нулі після коми (наприклад, 1.0 -> 1)
+                if display_amount == int(display_amount):
+                    display_amount = int(display_amount)
+                else:
+                    display_amount = round(display_amount, 2)
 
             final_list.append({
                 'ingredient_id': ing_id,
                 'ingredient_name': ing_name,
-                'ingredient_image': f"/media/{image}" if image else None,  # Віддаємо шлях до картинки
+                'ingredient_image': f"/media/{image}" if image else None,
                 'unit': display_unit,
                 'required_amount': total_req,
                 'already_have': have_amount,
                 'to_buy': display_amount,
-                'is_fully_stocked': to_buy_base == 0 and total_req > 0,
+                'is_fully_stocked': to_buy_base == 0 and total_req is not None and total_req > 0,
                 '_sort_weight': to_buy_base
             })
 
+        # Спочатку ті продукти, які треба купити
         final_list.sort(key=lambda x: (x['_sort_weight'] > 0, x['_sort_weight']), reverse=True)
         for item in final_list: item.pop('_sort_weight', None)
 
@@ -357,3 +391,12 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    @action(detail=False, methods=['delete'], url_path=r'remove-recipe/(?P<recipe_id>[^/.]+)')
+    def remove_recipe(self, request, recipe_id=None):
+        # Шукаємо і видаляємо всі записи з цим рецептом для поточного користувача
+        deleted, _ = self.get_queryset().filter(recipe_id=recipe_id).delete()
+
+        if deleted:
+            return Response(status=204)  # 204 No Content - успішне видалення
+        return Response({"error": "Рецепт не знайдено в меню"}, status=404)

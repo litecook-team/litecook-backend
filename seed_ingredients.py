@@ -85,7 +85,7 @@ INGREDIENTS_DATA = [
     ("Форель", IngredientCategory.FISH_RED, False, []),
     ("Філе лосося", IngredientCategory.FISH_RED, False, []),
     ("Восьминіг", IngredientCategory.SEAFOOD, False, []),
-    ("Кальмари", IngredientCategory.SEAFOOD, False, []),
+    ("Кальмар", IngredientCategory.SEAFOOD, False, []),
     ("Креветки", IngredientCategory.SEAFOOD, False, []),
     ("Мідії", IngredientCategory.SEAFOOD, False, []),
     ("Креветки очищені", IngredientCategory.SEAFOOD, False, []),
@@ -174,7 +174,7 @@ INGREDIENTS_DATA = [
     ("Свинячий фарш", IngredientCategory.MEAT_PORK, False, []),
     ("Свинячі відбивні", IngredientCategory.MEAT_PORK, False, []),
     ("Свинячі ребра", IngredientCategory.MEAT_PORK, False, []),
-    ("Свинина", IngredientCategory.MEAT_PORK, False, []),
+    # ("Свинина", IngredientCategory.MEAT_PORK, False, []),
 
     ("Індиче філе", IngredientCategory.MEAT_BIRD, False, []),
     ("Качка", IngredientCategory.MEAT_BIRD, False, []),
@@ -229,7 +229,7 @@ INGREDIENTS_DATA = [
     ("Петрушка", IngredientCategory.GREENS, True, [5, 6, 7, 8]),
     ("Розмарин", IngredientCategory.GREENS, True, [6, 7, 8, 9, 10]),
     ("Рукола", IngredientCategory.GREENS, True, [5, 6, 7]),
-    ("Чебрець (тим'ян)", IngredientCategory.GREENS, True, [6, 7, 8, 9, 10]),
+    ("Тим'ян", IngredientCategory.GREENS, True, [6, 7, 8, 9, 10]),
     ("Шпинат", IngredientCategory.GREENS, True, [5, 6, 7]),
     ("Щавель", IngredientCategory.GREENS, True, [5, 6, 7]),
 
@@ -240,7 +240,7 @@ INGREDIENTS_DATA = [
     ("Маслюки", IngredientCategory.MUSHROOMS, True, [8, 9, 10]),
     ("Опеньки", IngredientCategory.MUSHROOMS, True, [8, 9, 10]),
     ("Печериці", IngredientCategory.MUSHROOMS, False, []),
-    ("Портобело", IngredientCategory.MUSHROOMS, False, []),
+    ("Портобелло", IngredientCategory.MUSHROOMS, False, []),
     ("Шиїтаке", IngredientCategory.MUSHROOMS, False, []),
 
     # ================= ГОРІХИ ТА НАСІННЯ =================

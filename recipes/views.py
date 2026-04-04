@@ -127,6 +127,35 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
 
+    def get_queryset(self):
+        # Базовий запит з підрахунком лайків
+        qs = Recipe.objects.annotate(likes_count=Count('favorited_by')).all()
+
+        # АВТОМАТИЧНА ФІЛЬТРАЦІЯ ЗА ПРОФІЛЕМ КОРИСТУВАЧА
+        if self.request.user.is_authenticated:
+            user = self.request.user
+
+            # 1. Приховуємо рецепти, що містять алергени користувача (БЕЗПЕКА)
+            # allergies - це ManyToManyField, тому перевіряємо через .exists()
+            if user.allergies.exists():
+                allergy_ids = user.allergies.values_list('id', flat=True)
+                qs = qs.exclude(ingredients__id__in=allergy_ids)
+
+            # 2. Сувора фільтрація: показувати тільки рецепти, що відповідають обраним дієтам
+            # Використовуємо `or []`, щоб безпечно обробити значення None з бази даних
+            user_diets = user.dietary_preferences or []
+            valid_diets = [d for d in user_diets if d]
+            if valid_diets:
+                qs = qs.filter(dietary_tags__overlap=valid_diets)
+
+            # 3. Сувора фільтрація: показувати тільки обрані кухні
+            user_cuisines = user.favorite_cuisines or []
+            valid_cuisines = [c for c in user_cuisines if c]
+            if valid_cuisines:
+                qs = qs.filter(cuisine__overlap=valid_cuisines)
+
+        return qs
+
     @action(detail=False, methods=['get'])
     def random_recipe(self, request):
         random_rec = self.get_queryset().order_by('?').first()

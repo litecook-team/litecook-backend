@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from django.db.models import Count, Sum, Q
 
 from django.core.mail import EmailMessage
-
+from datetime import date
+from .models import RecipeOfDay
 
 # Імпортуємо інструменти для кастомної фільтрації
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, CharFilter, NumberFilter, MultipleChoiceFilter
@@ -158,11 +159,25 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def random_recipe(self, request):
-        random_rec = self.get_queryset().order_by('?').first()
-        if random_rec:
-            serializer = self.get_serializer(random_rec)
-            return Response(serializer.data)
-        return Response({"detail": "Немає рецептів"}, status=404)
+        today = date.today()
+
+        # 1. Перевіряємо, чи вже був згенерований рецепт на сьогодні
+        try:
+            daily_record = RecipeOfDay.objects.get(date=today)
+            recipe = daily_record.recipe
+        except RecipeOfDay.DoesNotExist:
+            # 2. Якщо немає — генеруємо випадковий і ЗБЕРІГАЄМО його в базу
+            recipe = Recipe.objects.order_by('?').first()
+            if recipe:
+                RecipeOfDay.objects.create(date=today, recipe=recipe)
+
+        # Перевірка на випадок, якщо база рецептів взагалі порожня
+        if not recipe:
+            return Response({"detail": "Рецептів не знайдено"}, status=404)
+
+        # 3. Віддаємо рецепт як зазвичай
+        serializer = self.get_serializer(recipe)
+        return Response(serializer.data)
 
     # === ЕНДПОІНТ ДЛЯ ПІДБОРУ РЕЦЕПТІВ ===
     @action(detail=False, methods=['get'])

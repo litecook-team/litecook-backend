@@ -3,7 +3,7 @@ from django import forms
 # from django.contrib.admin.widgets import FilteredSelectMultiple
 
 from .models.ingredient import Ingredient
-from .models.recipe import Recipe, RecipeIngredient, RecipeStep, Cuisine, MealTime, Diet, DishType
+from .models.recipe import Recipe, RecipeIngredient, RecipeStep, Cuisine, MealTime, Diet, DishType, RecipeOfDay
 from .models.favorite import FavoriteRecipe
 from .models.weekly_menu import WeeklyMenu
 
@@ -57,8 +57,22 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display = ('title', 'cooking_time', 'calories', 'difficulty', 'is_seasonal')
     list_filter = ('difficulty', 'is_seasonal')
     readonly_fields = ('is_seasonal', 'seasonal_months')
+    # Шукатимемо за назвою рецепту
+    search_fields = ('title',)
+
+@admin.register(RecipeOfDay)
+class RecipeOfDayAdmin(admin.ModelAdmin):
+    list_display = ('date', 'recipe') # Що показувати в колонках
+    list_filter = ('date',)           # Фільтр по даті збоку
+    ordering = ('-date',)             # Найновіші дати зверху
 
 
-admin.site.register(Ingredient)
+# ПОШУК ДЛЯ ІНГРЕДІЄНТІВ
+@admin.register(Ingredient)
+class IngredientAdmin(admin.ModelAdmin):
+    search_fields = ('name',)
+    list_display = ('name', 'is_seasonal')
+    list_filter = ('is_seasonal',)
+
 admin.site.register(FavoriteRecipe)
 admin.site.register(WeeklyMenu)

@@ -3,6 +3,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from .ingredient import Month
+from datetime import date
 
 # ================= КЛАСИ CHOICES ДЛЯ РЕЦЕПТІВ =================
 
@@ -224,3 +225,16 @@ class RecipeStep(models.Model):
 
     def __str__(self):
         return f"Крок {self.step_number} для {self.recipe.title}"
+
+class RecipeOfDay(models.Model):
+    # Унікальна дата (за замовчуванням - сьогодні)
+    date = models.DateField(unique=True, default=date.today, verbose_name="Дата")
+    # Зв'язок з вашим основним рецептом
+    recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE, verbose_name="Рецепт")
+
+    class Meta:
+        verbose_name = "Рецепт дня"
+        verbose_name_plural = "Рецепти дня"
+
+    def __str__(self):
+        return f"Рецепт дня на {self.date}: {self.recipe.title}"

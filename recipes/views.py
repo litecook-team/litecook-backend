@@ -40,6 +40,11 @@ class RecipeFilter(FilterSet):
     # Реєстрація кастомного поля для пошуку
     search_query = CharFilter(method='filter_search_query')
 
+    # 3 НОВІ ФІЛЬТРИ:
+    max_calories = NumberFilter(field_name='calories', lookup_expr='lte')  # Менше або дорівнює (калорії)
+    months = CharFilter(method='filter_by_months')  # Фільтр по конкретних місяцях
+    ingredient_categories = CharFilter(method='filter_by_ingredient_categories')  # Фільтр по категоріях інгредієнтів
+
     class Meta:
         model = Recipe
         fields = ['is_seasonal']
@@ -106,6 +111,22 @@ class RecipeFilter(FilterSet):
         if target_months:
             return queryset.filter(seasonal_months__overlap=list(target_months))
         return queryset
+
+    # === ЛОГІКА ДЛЯ НОВИХ ФІЛЬТРІВ ===
+    def filter_by_months(self, queryset, name, value):
+        """ Шукає рецепти, які підходять для обраних конкретних місяців """
+        if not value: return queryset
+        month_ids = [int(m.strip()) for m in value.split(',') if m.strip().isdigit()]
+        if month_ids:
+            return queryset.filter(seasonal_months__overlap=month_ids)
+        return queryset
+
+    def filter_by_ingredient_categories(self, queryset, name, value):
+        """ Шукає рецепти, в яких є інгредієнти з обраних категорій """
+        if not value: return queryset
+        categories = [c.strip() for c in value.split(',')]
+        # Використовуємо .distinct(), щоб рецепт не дублювався, якщо там кілька овочів
+        return queryset.filter(ingredients__category__in=categories).distinct()
 
 
 # ================= VIEWSET РЕЦЕПТІВ =================

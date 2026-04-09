@@ -54,18 +54,22 @@ class RecipeFilter(FilterSet):
         if not value:
             return queryset
 
+        # Якщо це запит на /match/, ми не фільтруємо тут, бо match робить це сам!
+        if 'match' in self.request.path:
+            return queryset
+
         # Якщо є кома, розбиваємо по комі. Якщо ні - по пробілу.
         if ',' in value:
             terms = [t.strip() for t in value.split(',') if t.strip()]
         else:
             terms = [t.strip() for t in value.split() if t.strip()]
 
+        # Звичайний пошук (якщо не match): Шукаємо хоча б ОДНЕ з введених слів у назві або інгредієнтах (OR)
+        query = Q()
         for term in terms:
-            # Ланцюжок фільтрів гарантує, що в рецепті є ВСІ введені інгредієнти
-            queryset = queryset.filter(
-                Q(title__icontains=term) | Q(ingredients__name__icontains=term)
-            )
-        return queryset.distinct()
+            query |= Q(title__icontains=term) | Q(ingredients__name__icontains=term)
+
+        return queryset.filter(query).distinct()
 
     def filter_by_ingredients(self, queryset, name, value):
         """ Шукає рецепти, які містять ВСІ обрані інгредієнти (І те, І те) """
@@ -204,40 +208,69 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def match(self, request):
         """
-        Шукає рецепти за наявними інгредієнтами і сортує за кількістю збігів.
-        Очікує: /api/recipes/match/?ingredients=1,2,3
+        Шукає рецепти за наявними інгредієнтами (за ID або за НАЗВОЮ) і сортує за кількістю збігів.
+        Очікує: /api/recipes/match/?ingredients=1,2,3 АБО /api/recipes/match/?search_query=картопля,морква
         """
         ingredients_param = request.query_params.get('ingredients')
+        search_query = request.query_params.get('search_query')
 
-        if not ingredients_param:
-            return Response([])  # Якщо нічого не передали, повертаємо пустий список
+        ingredient_ids = []
 
-        ingredient_ids = [int(i.strip()) for i in ingredients_param.split(',') if i.strip().isdigit()]
+        # 1. Якщо передали ID
+        if ingredients_param:
+            ingredient_ids = [int(i.strip()) for i in ingredients_param.split(',') if i.strip().isdigit()]
 
-        if not ingredient_ids:
+        # 2. Якщо передали текст (як на сторінці підбору)
+        elif search_query:
+            # Розбиваємо текст на окремі інгредієнти
+            if ',' in search_query:
+                terms = [t.strip().lower() for t in search_query.split(',') if t.strip()]
+            else:
+                terms = [t.strip().lower() for t in search_query.split() if t.strip()]
+
+            # Знаходимо ID всіх інгредієнтів, які відповідають цим словам
+            if terms:
+                # Використовуємо __icontains для гнучкого пошуку (напр., "карт" знайде "картопля")
+                query = Q()
+                for term in terms:
+                    query |= Q(name__icontains=term)
+
+                matched_ingredients = Ingredient.objects.filter(query).values_list('id', flat=True)
+                ingredient_ids = list(matched_ingredients)
+
+        # 1. Застосовуємо всі інші фільтри (кухня, калорії і тд), ОКРІМ пошукового рядка
+        # (бо пошуковий рядок ми обробили вище і перетворили на ingredient_ids)
+        queryset = self.get_queryset()
+        filterset = RecipeFilter(request.query_params, request=request, queryset=queryset)
+        if filterset.is_valid():
+            queryset = filterset.qs
+
+        # 2. Якщо ввели інгредієнти, але їх немає в базі взагалі - повертаємо пусто
+        if (ingredients_param or search_query) and not ingredient_ids:
             return Response([])
 
-        queryset = self.get_queryset().annotate(
-            total_count=Count('recipe_ingredients', distinct=True),
-            match_count=Count(
-                'recipe_ingredients',
-                filter=Q(recipe_ingredients__ingredient_id__in=ingredient_ids),
-                distinct=True
+        # 3. Анотуємо та фільтруємо (тільки якщо є інгредієнти для пошуку)
+        if ingredient_ids:
+            queryset = queryset.annotate(
+                total_count=Count('recipe_ingredients', distinct=True),
+                match_count=Count(
+                    'recipe_ingredients',
+                    filter=Q(recipe_ingredients__ingredient_id__in=ingredient_ids),
+                    distinct=True
+                )
+            ).filter(
+                match_count__gt=0
+            ).order_by(
+                '-match_count',
+                'total_count'
             )
-        ).filter(
-            match_count__gt=0  # Беремо тільки ті, де збігся хоча б 1
-        ).order_by(
-            '-match_count',  # Спочатку ті, де збігів найбільше (напр. 9)
-            'total_count'  # Якщо збігів однаково, вище той, де загалом треба менше інгредієнтів
-        )
 
-        # Пагінація
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = RecipeMatchSerializer(page, many=True, context={'request': request})
+            serializer = RecipeSerializer(page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
 
-        serializer = RecipeMatchSerializer(queryset, many=True, context={'request': request})
+        serializer = RecipeSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
 

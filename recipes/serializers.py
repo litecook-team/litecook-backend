@@ -26,12 +26,16 @@ class RecipeStepSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     recipe_ingredients = RecipeIngredientSerializer(many=True, read_only=True)
     steps = RecipeStepSerializer(many=True, read_only=True)
-    likes_count = serializers.IntegerField(read_only=True)  # Кількість лайків
-    is_favorited = serializers.SerializerMethodField()  # Чи лайкнув поточний юзер
+    likes_count = serializers.IntegerField(read_only=True)
+    is_favorited = serializers.SerializerMethodField()
     is_added_to_menu = serializers.SerializerMethodField()
 
     created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M", read_only=True)
     updated_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M", read_only=True)
+
+    # Поля для відображення збігів (read_only=True, required=False)
+    match_count = serializers.IntegerField(read_only=True, required=False)
+    total_count = serializers.IntegerField(read_only=True, required=False)
 
     class Meta:
         model = Recipe

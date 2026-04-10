@@ -149,7 +149,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     ordering_fields = ['likes_count', 'cooking_time', 'calories']
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve', 'random_recipe']:
+        if self.action in ['list', 'retrieve', 'random_recipe', 'match']:
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
 

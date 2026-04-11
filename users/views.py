@@ -16,13 +16,13 @@ class GoogleLogin(SocialLoginView):
 class FacebookLogin(SocialLoginView):
     adapter_class = FacebookOAuth2Adapter
 
-# ================= ВІРТУАЛЬНИЙ ХОЛОДИЛЬНИК (ІНВЕНТАР) =================
+# ================= Мої продукти (ІНВЕНТАР) =================
 class UserIngredientViewSet(viewsets.ModelViewSet):
     serializer_class = UserIngredientSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Юзер бачить тільки свій холодильник
+        # Юзер бачить тільки свої продукти
         return UserIngredient.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):

@@ -76,38 +76,53 @@ class CustomUserDetailsSerializer(UserDetailsSerializer):
 
 
 class CustomPasswordResetSerializer(PasswordResetSerializer):
-    def save(self):
-        # Дістаємо email, який ввів користувач на фронтенді
-        email = self.validated_data['email']
-        user = CustomUser.objects.filter(email=email).first()
+    def validate_email(self, value):
+        # 1. ПЕРЕВІРКА: Чи існує користувач з такою поштою?
+        user = CustomUser.objects.filter(email=value).first()
+        if not user:
+            # викидаємо помилку з ключем 'email', яку фронтенд очікує і вміє обробляти.
+            raise serializers.ValidationError("Користувача з такою електронною поштою не знайдено.")
 
-        if user:
-            # Генеруємо безпечні ключі для скидання пароля
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            token = default_token_generator.make_token(user)
-
-            # Дані, які ми передамо в наш HTML-шаблон
-            context = {
-                'frontend_url': settings.FRONTEND_URL,
-                'uid': uid,
-                'token': token,
-            }
-
-            # Генеруємо HTML-версію листа
-            html_content = render_to_string('registration/password_reset_email.html', context)
-
-            # Текстова версія (резервна, якщо пошта користувача не підтримує HTML)
-            text_content = f"Відновлення пароля:\nПерейдіть за посиланням: {settings.FRONTEND_URL}/reset-password-confirm/{uid}/{token}"
-
-            # ВІДПРАВЛЯЄМО ЛИСТ САМОСТІЙНО!
-            msg = EmailMultiAlternatives(
-                subject="Відновлення пароля у LITE cook",  # Красива тема листа
-                body=text_content,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[user.email]
+        # 2. ПЕРЕВІРКА: Чи має користувач встановлений пароль (чи це соц. акаунт)?
+        if not user.has_usable_password():
+            raise serializers.ValidationError(
+                "Цей акаунт був зареєстрований через соціальні мережі (Google/Facebook). "
+                "Для входу скористайтеся відповідною кнопкою на сторінці авторизації."
             )
-            msg.attach_alternative(html_content, "text/html")
-            msg.send()
+
+        return value
+
+    def save(self):
+        # Оскільки ми вже пройшли валідацію, ми точно знаємо, що юзер існує
+        email = self.validated_data['email']
+        user = CustomUser.objects.get(email=email)
+
+        # Генеруємо безпечні ключі для скидання пароля
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+
+        # Дані, які ми передамо в наш HTML-шаблон
+        context = {
+            'frontend_url': settings.FRONTEND_URL,
+            'uid': uid,
+            'token': token,
+        }
+
+        # Генеруємо HTML-версію листа
+        html_content = render_to_string('registration/password_reset_email.html', context)
+
+        # Текстова версія (резервна, якщо пошта користувача не підтримує HTML)
+        text_content = f"Відновлення пароля:\nПерейдіть за посиланням: {settings.FRONTEND_URL}/reset-password-confirm/{uid}/{token}"
+
+        # ВІДПРАВЛЯЄМО ЛИСТ САМОСТІЙНО!
+        msg = EmailMultiAlternatives(
+            subject="Відновлення пароля у LITE cook",
+            body=text_content,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.email]
+        )
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
 
 class CustomPasswordResetConfirmSerializer(PasswordResetConfirmSerializer):
     def validate(self, attrs):

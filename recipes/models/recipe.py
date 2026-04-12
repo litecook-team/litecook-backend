@@ -28,7 +28,9 @@ class Diet(models.TextChoices):
     GLUTEN_FREE = 'gluten_free', 'Безглютеновий'
     LACTOSE_FREE = 'lactose_free', 'Безлактозний'
     SUGAR_FREE = 'sugar_free', 'Без цукру'
-
+    HIGH_PROTEIN = 'high_protein', 'Високобілковий'
+    MEAT = 'meat_diet', 'М’ясний'
+    SEAFOOD_DIET = 'seafood_diet', 'Морський (Морепродукти)'
 
 class DishType(models.TextChoices):
     FIRST = 'first', 'Перша страва'
@@ -48,7 +50,11 @@ class DishType(models.TextChoices):
     MEAT = 'meat', 'М’ясна страва'
     FISH = 'fish', 'Рибна страва'
     SEAFOOD = 'seafood', 'Морепродукти'
-
+    COLD_SNACK = 'cold_snack', 'Холодна закуска'
+    HOT_SNACK = 'hot_snack', 'Гаряча закуска'
+    FESTIVE = 'festive', 'Святкова страва'
+    ASPIC = 'aspic', 'Заливне'
+    STEW = 'stew', 'Рагу / тушкована страва'
 
 class Cuisine(models.TextChoices):
     EUROPEAN = 'eu', '🇪🇺 Європейська кухня'
@@ -62,6 +68,9 @@ class Cuisine(models.TextChoices):
     CHINESE = 'cn', '🇨🇳 Китайська кухня'
     JAPANESE = 'jp', '🇯🇵 Японська кухня'
     ASIAN = 'asian', '🥢 Азійська кухня'
+    BRITISH = 'gb', '🇬🇧 Британська кухня'
+    AUTHOR = 'author', '👨‍🍳 Авторська кухня'
+    INDIAN = 'in', '🇮🇳 Індійська кухня'
 
 
 class UnitChoice(models.TextChoices):

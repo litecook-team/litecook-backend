@@ -3,7 +3,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Count, Sum, Q
 
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.conf import settings
 from datetime import date
 from .models import RecipeOfDay
 
@@ -448,12 +450,30 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
         if not email or not pdf_file:
             return Response({"error": "Email та файл обов'язкові"}, status=400)
 
-        mail = EmailMessage(
-            "Список продуктів | LITE cook",
-            "Привіт! Надсилаємо ваш красивий список продуктів у прикріпленому PDF-файлі. Зручних та смачних покупок!",
+        # 1. Текстова версія (якщо пошта не підтримує HTML)
+        text_content = "Привіт! Ваш красивий список продуктів у прикріпленому PDF-файлі. Зручних та смачних покупок!"
+
+        # 2. Передаємо frontend_url, щоб у листі завантажився ваш фірмовий фон 'exit.jpg'
+        context = {
+            'frontend_url': settings.FRONTEND_URL,
+        }
+
+        # 3. Рендеримо нашу нову красиву HTML-версію
+        html_content = render_to_string('emails/shopping_list_email.html', context)
+
+        # 4. Формуємо лист
+        mail = EmailMultiAlternatives(
+            subject="Ваш список продуктів | LITE cook",
+            body=text_content,
+            from_email=settings.DEFAULT_FROM_EMAIL,
             to=[email]
         )
+
+        # 5. Додаємо HTML версію та PDF файл
+        mail.attach_alternative(html_content, "text/html")
         mail.attach(pdf_file.name, pdf_file.read(), 'application/pdf')
+
+        # 6. Відправляємо
         mail.send()
 
         return Response({"message": "Відправлено на пошту!"})

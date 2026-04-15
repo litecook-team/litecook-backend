@@ -211,47 +211,49 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def match(self, request):
         """
         Шукає рецепти за наявними інгредієнтами (за ID або за НАЗВОЮ) і сортує за кількістю збігів.
-        Очікує: /api/recipes/match/?ingredients=1,2,3 АБО /api/recipes/match/?search_query=картопля,морква
+        Очікує: /api/recipes/match/?ingredients=1,2,3 (ЛОГІКА "АБО" - знайти рецепти хоча б з одним інгредієнтом)
         """
         ingredients_param = request.query_params.get('ingredients')
         search_query = request.query_params.get('search_query')
 
         ingredient_ids = []
 
-        # 1. Якщо передали ID
+        # 1. Якщо фронтенд передав точні ID інгредієнтів (головний сценарій)
         if ingredients_param:
             ingredient_ids = [int(i.strip()) for i in ingredients_param.split(',') if i.strip().isdigit()]
 
-        # 2. Якщо передали текст (як на сторінці підбору)
+        # 2. Фолбек: якщо передали текст (якщо фронтенд чомусь не зміг знайти ID)
         elif search_query:
-            # Розбиваємо текст на окремі інгредієнти
             if ',' in search_query:
                 terms = [t.strip().lower() for t in search_query.split(',') if t.strip()]
             else:
                 terms = [t.strip().lower() for t in search_query.split() if t.strip()]
 
-            # Знаходимо ID всіх інгредієнтів, які відповідають цим словам
             if terms:
-                # Використовуємо __icontains для гнучкого пошуку (напр., "карт" знайде "картопля")
-                query = Q()
-                for term in terms:
-                    query |= Q(name__icontains=term)
-
-                matched_ingredients = Ingredient.objects.filter(query).values_list('id', flat=True)
+                # Використовуємо name__in для точного збігу слів
+                matched_ingredients = Ingredient.objects.filter(name__in=terms).values_list('id', flat=True)
                 ingredient_ids = list(matched_ingredients)
 
-        # 1. Застосовуємо всі інші фільтри (кухня, калорії і тд), ОКРІМ пошукового рядка
-        # (бо пошуковий рядок ми обробили вище і перетворили на ingredient_ids)
         queryset = self.get_queryset()
-        filterset = RecipeFilter(request.query_params, request=request, queryset=queryset)
+
+        # === ГОЛОВНИЙ ФІКС ===
+        # Ми повинні застосувати інші фільтри (калорії, кухня тощо),
+        # АЛЕ ми мусимо ПРИХОВАТИ параметр 'ingredients' від стандартного RecipeFilter.
+        # Бо якщо ми цього не зробимо, RecipeFilter застосує свою логіку "І" (AND),
+        # а нам потрібна логіка "АБО" (OR), яку ми самі зробимо нижче.
+        mutable_query_params = request.query_params.copy()
+        if 'ingredients' in mutable_query_params:
+            del mutable_query_params['ingredients']
+
+        filterset = RecipeFilter(mutable_query_params, request=request, queryset=queryset)
         if filterset.is_valid():
             queryset = filterset.qs
 
-        # 2. Якщо ввели інгредієнти, але їх немає в базі взагалі - повертаємо пусто
+        # Якщо ввели інгредієнти, але їх немає в базі взагалі - повертаємо пусто
         if (ingredients_param or search_query) and not ingredient_ids:
             return Response([])
 
-        # 3. Анотуємо та фільтруємо (тільки якщо є інгредієнти для пошуку)
+        # 3. Анотуємо та фільтруємо за логікою "АБО" (якщо є хоча б один з інгредієнтів)
         if ingredient_ids:
             queryset = queryset.annotate(
                 total_count=Count('recipe_ingredients', distinct=True),
@@ -261,7 +263,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     distinct=True
                 )
             ).filter(
-                match_count__gt=0
+                match_count__gt=0  # Ось тут працює "АБО": якщо є хоча б 1 збіг, залишаємо рецепт
             ).order_by(
                 '-match_count',
                 'total_count'
@@ -274,7 +276,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         serializer = RecipeSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
-
 
 # ================= ІНШІ VIEWSETS =================
 class IngredientViewSet(viewsets.ModelViewSet):

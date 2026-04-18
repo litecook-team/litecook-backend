@@ -31,6 +31,34 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# Зчитуємо ключі з .env файлу (або змінних середовища сервера)
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+
+# Регіон, де створено бакет
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME')
+
+# Щоб файли не перетирали один одного, якщо мають однакові імена
+AWS_S3_FILE_OVERWRITE = False
+
+# Забираємо складні підписи з URL, щоб картинки можна було кешувати на фронтенді
+AWS_QUERYSTRING_AUTH = False
+
+# Сучасне налаштування для Django 4.2+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "location": "media", # Всі завантаження падатимуть у папку media/ всередині бакета
+        },
+    },
+    # Для статики (CSS/JS) поки залишаємо локальне сховище
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
 ALLOWED_HOSTS = ['litecook-backend.duckdns.org', '3.89.80.104', 'localhost', '127.0.0.1']
 
 # Application definition
@@ -47,6 +75,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
 
     # Бібліотеки для авторизації та соцмереж
@@ -62,6 +91,7 @@ INSTALLED_APPS = [
     # локальні додатки
     'users',
     'recipes',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -74,6 +104,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'users.middleware.UserActivityMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -195,9 +226,9 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = f"LITE cook <{EMAIL_HOST_USER}>"
 
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# використовуємо S3,тому це закоментуємо або можемо видалити
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Дозволяємо фронтенду стукати на наш API
 CORS_ALLOWED_ORIGINS = [

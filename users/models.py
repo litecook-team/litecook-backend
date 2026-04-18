@@ -2,9 +2,13 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.dispatch import receiver
 from allauth.account.signals import email_confirmed
+from allauth.socialaccount.signals import social_account_added
 from django.db.models.signals import post_save
 from allauth.account.models import EmailAddress
 from django.contrib.postgres.fields import ArrayField
+
+from django.utils import timezone
+from datetime import timedelta
 
 from recipes.models.recipe import Diet, Cuisine, UnitChoice
 
@@ -37,6 +41,11 @@ class CustomUser(AbstractUser):
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, verbose_name='Аватар')
     allergies = models.ManyToManyField('recipes.Ingredient', blank=True, verbose_name="Алергії на інгредієнти")
 
+    is_banned = models.BooleanField(default=False, verbose_name="Заблокований")
+    banned_until = models.DateTimeField(null=True, blank=True, verbose_name="Заблокований до")
+    ban_reason = models.TextField(blank=True, null=True, verbose_name="Причина блокування")
+    last_activity = models.DateTimeField(null=True, blank=True, verbose_name="Остання активність")
+
     dietary_preferences = ArrayField(
         models.CharField(max_length=30, choices=Diet.choices),
         blank=True, null=True,
@@ -47,6 +56,16 @@ class CustomUser(AbstractUser):
         blank=True, null=True,
         verbose_name="Улюблені кухні"
     )
+
+    def is_online(self):
+        """Перевіряє, чи був користувач активний останні 5 хвилин"""
+        if self.last_activity:
+            now = timezone.now()
+            return now - self.last_activity < timedelta(minutes=5)
+        return False
+
+    is_online.boolean = True
+    is_online.short_description = "Онлайн"
 
     USERNAME_FIELD = 'email'
     # Вказуємо, що при створенні адміна через консоль, система має запитати Ім'я
@@ -61,7 +80,24 @@ class CustomUser(AbstractUser):
 def update_user_email_verified(request, email_address, **kwargs):
     user = email_address.user
     user.is_email_verified = True
-    user.save()
+    user.save(update_fields=['is_email_verified'])
+
+# Для реєстрації через Google/Facebook
+@receiver(social_account_added)
+def auto_verify_social_login(request, sociallogin, **kwargs):
+    user = sociallogin.user
+    # Оскільки це вхід через Google/Facebook, пошта вважається підтвердженою
+    if not user.is_email_verified:
+        user.is_email_verified = True
+        user.save(update_fields=['is_email_verified'])
+
+    # Також переконаємося, що в системі allauth цей email відмічений як verified
+    if user.email:
+        EmailAddress.objects.get_or_create(
+            user=user,
+            email=user.email,
+            defaults={'verified': True, 'primary': True}
+        )
 
 
 @receiver(post_save, sender=CustomUser)
@@ -109,3 +145,31 @@ class UserIngredient(models.Model):
             clean_amount = self.amount.normalize()
             return f"{self.ingredient.name} - {clean_amount} {self.get_unit_display()}"
         return f"{self.ingredient.name} - {self.get_unit_display()}"
+
+
+# =======================================================
+# МОДЕЛЬ ДЛЯ ВІДСТЕЖЕННЯ СЕСІЙ
+# =======================================================
+class UserActivityLog(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='activity_logs')
+    ip_address = models.GenericIPAddressField(null=True, blank=True, verbose_name="IP адреса")
+
+    # Сучасні розпарсені дані
+    os = models.CharField(max_length=50, blank=True, null=True, verbose_name="Операційна система")
+    browser = models.CharField(max_length=50, blank=True, null=True, verbose_name="Браузер")
+    device_type = models.CharField(max_length=50, blank=True, null=True, verbose_name="Тип пристрою")
+
+    country = models.CharField(max_length=100, blank=True, null=True, verbose_name="Країна")
+    last_endpoint = models.CharField(max_length=255, blank=True, null=True, verbose_name="Остання дія (URL)")
+
+    first_seen = models.DateTimeField(auto_now_add=True, verbose_name="Перший вхід")
+    last_seen = models.DateTimeField(auto_now=True, verbose_name="Остання активність тут")
+    is_active_session = models.BooleanField(default=True, verbose_name="Токен активний")
+
+    class Meta:
+        verbose_name = "Сесія користувача"
+        verbose_name_plural = "Сесії користувачів"
+        ordering = ['-last_seen']
+
+    def __str__(self):
+        return f"{self.user.email} - {self.os} ({self.browser})"

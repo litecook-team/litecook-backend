@@ -57,7 +57,6 @@ INGREDIENTS_DATA = [
     ("Орегано", IngredientCategory.SPICES, False, []),
     ("Перець", IngredientCategory.SPICES, False, []),
     ("Сіль", IngredientCategory.SPICES, False, []),
-    ("Чорний перець", IngredientCategory.SPICES, False, []),
 
     # ================= СИРИ =================
     ("Бринза", IngredientCategory.CHEESE, False, []),
@@ -140,7 +139,6 @@ INGREDIENTS_DATA = [
     ("Цибуля шалот", IngredientCategory.VEGETABLES, True, [7, 8, 9]),
     ("Цукіні", IngredientCategory.VEGETABLES, True, [6, 7, 8]),
     ("Часник", IngredientCategory.VEGETABLES, True, [7, 8, 9]),
-    ("Болгарський перець", IngredientCategory.VEGETABLES, True, [7, 8, 9]),
     ("Помідори чері", IngredientCategory.VEGETABLES, True, [7, 8, 9]),
 
     # ================= МОЛОЧНІ ПРОДУКТИ ТА ЯЙЦЯ =================

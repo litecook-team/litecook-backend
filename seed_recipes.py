@@ -55,14 +55,14 @@ RECIPES_DATA = [
         "dish_types": [DishType.GARNISH],
         "ingredients": [
             ("Кабачок", 1, UnitChoice.PCS),
-            ("Болгарський перець", 1, UnitChoice.PCS),
+            ("Перець болгарський", 1, UnitChoice.PCS),
             ("Морква", 1, UnitChoice.PCS),
             ("Броколі", 100, UnitChoice.G),
             ("Оливкова олія", 2, UnitChoice.TBSP),
             ("Часник", 2, UnitChoice.CLOVE),
             ("Орегано", 1, UnitChoice.TSP),
             ("Сіль", None, UnitChoice.TASTE), # Розділено
-            ("Чорний перець", None, UnitChoice.TASTE),
+            ("Перець чорний", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Наріжте овочі великими шматками.",
@@ -90,7 +90,7 @@ RECIPES_DATA = [
             ("Часник", 2, UnitChoice.CLOVE),
             ("Петрушка", 10, UnitChoice.G),
             ("Сіль", None, UnitChoice.TASTE), # Розділено
-            ("Чорний перець", None, UnitChoice.TASTE),
+            ("Перець чорний", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Натріть курку сіллю та перцем.",
@@ -121,7 +121,7 @@ RECIPES_DATA = [
             ("Оливкова олія", 2, UnitChoice.TBSP),
             ("Лимонний сік", 1, UnitChoice.TBSP),
             ("Сіль", None, UnitChoice.TASTE), # Розділено
-            ("Чорний перець", None, UnitChoice.TASTE),
+            ("Перець чорний", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Промийте кіноа та відваріть у підсоленій воді приблизно 15 хвилин, охолодіть.",
@@ -176,7 +176,7 @@ RECIPES_DATA = [
             ("Оливкова олія", 1, UnitChoice.TBSP),
             ("Овочевий бульйон", 400, UnitChoice.ML),
             ("Сіль", None, UnitChoice.TASTE), # Розділено
-            ("Чорний перець", None, UnitChoice.TASTE),
+            ("Перець чорний", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Наріжте цибулю та часник і обсмажте на оливковій олії.",
@@ -203,7 +203,7 @@ RECIPES_DATA = [
             ("Оливкова олія", 2, UnitChoice.TBSP),
             ("Петрушка", 10, UnitChoice.G),
             ("Сіль", None, UnitChoice.TASTE), # Розділено
-            ("Чорний перець", None, UnitChoice.TASTE),
+            ("Перець чорний", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Відваріть пасту до готовності.",
@@ -258,7 +258,7 @@ RECIPES_DATA = [
             ("Лимон", 0.5, UnitChoice.PCS),
             ("Оливкова олія", 1, UnitChoice.TBSP),
             ("Сіль", None, UnitChoice.TASTE), # Розділено
-            ("Чорний перець", None, UnitChoice.TASTE),
+            ("Перець чорний", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Наріжте овочі.",
@@ -287,7 +287,7 @@ RECIPES_DATA = [
             ("Лимонний сік", 1, UnitChoice.TBSP),
             ("Оливкова олія", 1, UnitChoice.TBSP),
             ("Сіль", None, UnitChoice.TASTE), # Розділено
-            ("Чорний перець", None, UnitChoice.TASTE),
+            ("Перець чорний", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Відваріть нут або використайте готовий.",
@@ -341,7 +341,7 @@ RECIPES_DATA = [
             ("Лимонний сік", 1, UnitChoice.TBSP),
             ("Петрушка", 10, UnitChoice.G),
             ("Сіль", None, UnitChoice.TASTE),
-            ("Чорний перець", None, UnitChoice.TASTE),
+            ("Перець чорний", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Розморозьте креветки та промийте їх водою.",
@@ -378,7 +378,7 @@ RECIPES_DATA = [
             ("Рослинна олія", 1, UnitChoice.TBSP),
             ("Вода", 1, UnitChoice.L),
             ("Сіль", None, UnitChoice.TASTE),
-            ("Чорний перець", None, UnitChoice.TASTE),
+            ("Перець чорний", None, UnitChoice.TASTE),
             ("Кріп", None, UnitChoice.TASTE),
         ],
         "steps": [
@@ -412,7 +412,7 @@ RECIPES_DATA = [
             ("Голландський сир", 50, UnitChoice.G),
             ("Вершкове масло", 10, UnitChoice.G),
             ("Сіль", None, UnitChoice.TASTE),
-            ("Чорний перець", None, UnitChoice.TASTE),
+            ("Перець чорний", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Розбийте яйця у миску, збийте яйця виделкою.",
@@ -555,7 +555,7 @@ RECIPES_DATA = [
             ("Оливкова олія", 1, UnitChoice.TBSP),
             ("Паприка", 1, UnitChoice.TSP),
             ("Сіль", None, UnitChoice.TASTE),
-            ("Чорний перець", None, UnitChoice.TASTE),
+            ("Перець чорний", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Наріжте свинину шматками.",
@@ -589,7 +589,7 @@ RECIPES_DATA = [
             ("Вершки", 100, UnitChoice.ML),
             ("Оливкова олія", 1, UnitChoice.TBSP),
             ("Сіль", None, UnitChoice.TASTE),
-            ("Чорний перець", None, UnitChoice.TASTE),
+            ("Перець чорний", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Очистіть гарбуз та наріжте гарбуз кубиками.",
@@ -678,7 +678,7 @@ RECIPES_DATA = [
             ("Цибуля ріпчаста", 1, UnitChoice.PCS),
             ("Рослинна олія", 1, UnitChoice.TBSP),
             ("Сіль", None, UnitChoice.TASTE),
-            ("Чорний перець", None, UnitChoice.TASTE),
+            ("Перець чорний", None, UnitChoice.TASTE),
         ],
         "steps": [
             "Просійте борошно, додайте воду, замісіть тісто.",

@@ -479,7 +479,7 @@ RECIPES_DATA = [
         "dietary_tags": [Diet.VEGAN],
         "dish_types": [DishType.SALAD],
         "ingredients": [
-            ("Огірок", 2, UnitChoice.PCS),
+            ("Огірок", 200, UnitChoice.G),
             ("Часник", 2, UnitChoice.CLOVE),
             ("Соєвий соус", 1, UnitChoice.TBSP),
             ("Рисовий оцет", 1, UnitChoice.TSP),
@@ -511,7 +511,7 @@ RECIPES_DATA = [
             ("Місо паста", 2, UnitChoice.TBSP),
             ("Тофу", 100, UnitChoice.G),
             ("Водорості вакаме", 5, UnitChoice.G),
-            ("Цибуля зелена", 1, UnitChoice.PCS),
+            ("Цибуля зелена", 20, UnitChoice.G),
             ("Вода", 500, UnitChoice.ML),
         ],
         "steps": [

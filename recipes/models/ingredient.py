@@ -61,7 +61,7 @@ CATEGORY_UNIT_MAP = {
     IngredientCategory.SWEETS: ['g', 'tsp', 'tbsp'],
     IngredientCategory.GREENS: ['bunch', 'g', 'sprig', 'taste'],
     IngredientCategory.MUSHROOMS: ['g', 'kg'],
-    IngredientCategory.NUTS: ['g', 'kg'],
+    IngredientCategory.NUTS: ['g', 'kg', 'tsp', 'tbsp'],
     IngredientCategory.FLOUR: ['g', 'kg', 'tbsp', 'glass'],
     IngredientCategory.ALT_PROTEIN: ['g', 'kg'],
 }

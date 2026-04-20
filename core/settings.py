@@ -45,25 +45,39 @@ AWS_S3_FILE_OVERWRITE = False
 # Забираємо складні підписи з URL, щоб картинки можна було кешувати на фронтенді
 AWS_QUERYSTRING_AUTH = False
 
-# Сучасне налаштування для Django 4.2+
-if os.environ.get('USE_S3') == 'True':
-    # Використовуємо Amazon S3
-    STORAGES = {
-        "default": {
-            "BACKEND": "storages.backends.s3.S3Storage",
-            "OPTIONS": {
-                "location": "media",  # Всі завантаження падатимуть у папку media/ всередині бакета
-            },
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "location": "media",  # Всі завантаження падатимуть у папку media/ всередині бакета
         },
-        # Для статики (CSS/JS) поки залишаємо локальне сховище
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-        },
-    }
-else:
-    # Працюємо локально (зберігаємо картинки в папку media на комп'ютері)
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    },
+    # Для статики (CSS/JS) поки залишаємо локальне сховище
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# # Сучасне налаштування для Django 4.2+
+# if os.environ.get('USE_S3') == 'True':
+#     # Використовуємо Amazon S3
+#     STORAGES = {
+#         "default": {
+#             "BACKEND": "storages.backends.s3.S3Storage",
+#             "OPTIONS": {
+#                 "location": "media",  # Всі завантаження падатимуть у папку media/ всередині бакета
+#             },
+#         },
+#         # Для статики (CSS/JS) поки залишаємо локальне сховище
+#         "staticfiles": {
+#             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+#         },
+#     }
+# else:
+#     # Працюємо локально (зберігаємо картинки в папку media на комп'ютері)
+#     MEDIA_URL = '/media/'
+#     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 ALLOWED_HOSTS = ['litecook-backend.duckdns.org', '3.89.80.104', 'localhost', '127.0.0.1']

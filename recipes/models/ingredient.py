@@ -22,7 +22,6 @@ class IngredientCategory(models.TextChoices):
     NUTS = 'nuts', 'Горіхи та насіння'
     DAIRY = 'dairy', 'Молочні продукти та яйця'
     SWEETS = 'sweets', 'Кондитерські інгредієнти'
-    # ДОДАНО:
     SPICES = 'spices', 'Спеції та приправи'
     OILS_LIQUIDS = 'oils_liquids', 'Спеції та приправи / Олії та рідини'
 
@@ -41,6 +40,56 @@ class Month(models.IntegerChoices):
     NOVEMBER = 11, 'Листопад'
     DECEMBER = 12, 'Грудень'
 
+# ================= ЖОРСТКІ ПРАВИЛА ОДИНИЦЬ ВИМІРУ =================
+
+# 1. Загальні правила для категорій (використовуємо рядки для уникнення циклічних імпортів)
+CATEGORY_UNIT_MAP = {
+    IngredientCategory.FRUITS: ['g', 'kg'],
+    IngredientCategory.VEGETABLES: ['g', 'kg'],
+    IngredientCategory.DAIRY: ['g', 'kg', 'ml', 'l'],
+    IngredientCategory.OILS_LIQUIDS: ['ml', 'l', 'tbsp', 'tsp'],
+    IngredientCategory.SPICES: ['taste', 'pinch', 'tsp', 'g'],
+    IngredientCategory.MEAT_BEEF: ['g', 'kg'],
+    IngredientCategory.MEAT_PORK: ['g', 'kg'],
+    IngredientCategory.MEAT_BIRD: ['g', 'kg'],
+    IngredientCategory.MEAT_PRODUCTS: ['g', 'kg', 'slice'],
+    IngredientCategory.GRAINS: ['g', 'kg', 'tbsp', 'glass'],
+    IngredientCategory.CHEESE: ['g', 'kg', 'slice'],
+    IngredientCategory.SEAFOOD: ['g', 'kg'],
+    IngredientCategory.FISH_RED: ['g', 'kg'],
+    IngredientCategory.FISH_WHITE: ['g', 'kg'],
+    IngredientCategory.SWEETS: ['g', 'tsp', 'tbsp'],
+    IngredientCategory.GREENS: ['bunch', 'g', 'sprig', 'taste'],
+    IngredientCategory.MUSHROOMS: ['g', 'kg'],
+    IngredientCategory.NUTS: ['g', 'kg'],
+    IngredientCategory.FLOUR: ['g', 'kg', 'tbsp', 'glass'],
+    IngredientCategory.ALT_PROTEIN: ['g', 'kg'],
+}
+
+# 2. Винятки: конкретні інгредієнти, які мають специфічні одиниці
+EXACT_UNIT_MATCH = {
+    'Яйця': ['pcs'],
+    'Перепелині яйця': ['pcs'],
+    'Лимон': ['pcs', 'slice', 'g'],
+    'Лайм': ['pcs', 'slice', 'g'],
+    'Авокадо': ['pcs', 'g'],
+    'Банан': ['pcs', 'g'],
+    'Часник': ['clove', 'g'],
+    'Вода': ['ml', 'l'],
+    'Бульйон': ['ml', 'l'],
+    'Овочевий бульйон': ['ml', 'l'],
+    'Сіль': ['taste', 'pinch', 'tsp', 'g'],
+    'Перець чорний': ['taste', 'pinch', 'tsp', 'g'],
+    'Хліб': ['slice', 'g'],
+    'Кокосове молоко': ['ml', 'l', 'can'],
+    'Томатна паста': ['g', 'tbsp', 'can'],
+    'Пападам': ['pcs'],
+    'Вершкове масло': ['g', 'kg'],
+    'Шоколад': ['g', 'pcs'],
+    'Темний шоколад': ['g', 'pcs'],
+    'Розпушувач': ['g', 'tsp'],
+    'Желатин': ['g', 'tsp'],
+}
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=150, unique=True, verbose_name="Назва інгредієнта")
@@ -67,3 +116,10 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return self.name
+
+    # Метод для отримання дозволених одиниць
+    def get_allowed_units(self):
+        """Повертає список дозволених одиниць виміру для цього конкретного інгредієнта"""
+        if self.name in EXACT_UNIT_MATCH:
+            return EXACT_UNIT_MATCH[self.name]
+        return CATEGORY_UNIT_MAP.get(self.category, ['g'])

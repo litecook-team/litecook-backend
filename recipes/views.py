@@ -353,8 +353,15 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
             if unit == 'tsp': return amount * 5, 'ml'  # 1 ч. л. ≈ 5 мл
             if unit == 'drop': return amount * 0.05, 'ml'  # 1 крапля ≈ 0.05 мл
 
-            # 3. Інші (pcs, pack, can, clove, pinch, bunch, taste тощо)
-            # Залишаємо як є, їх математично перевести в грами без втрати логіки неможливо
+            # 3. КУЛІНАРНА МАГІЯ ДЛЯ ЗЕЛЕНІ ТА ЧАСНИКУ
+            # Приблизна вага 1 пучка зелені - 40 грамів
+            if unit == 'bunch': return amount * 40, 'g'
+            # Приблизна вага 1 гілочки (sprig) зелені - 2 грами
+            if unit == 'sprig': return amount * 2, 'g'
+            # Приблизна вага 1 зубчика часнику - 4 грами
+            if unit == 'clove': return amount * 4, 'g'
+
+            # Інші (pcs, pack, can, taste тощо) залишаємо як є
             return amount, unit
 
         # =========================================================
@@ -391,26 +398,57 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
         for (ing_id, ing_name, unit, image), total_req in merged_requirements.items():
 
             have_amount = 0
+            has_any_amount = False  # Додаємо прапорець, чи є хоч щось в холодильнику
+            inv_display_unit = unit  # За замовчуванням одиниця залишку така ж, як у рецепті
+
             if use_fridge:
                 # Шукаємо точний збіг (наприклад, pcs і pcs, або ml і ml)
                 if (ing_id, unit) in inventory_dict:
                     have_amount = inventory_dict[(ing_id, unit)]
-                # КУЛІНАРНА МАГІЯ: Якщо рецепт просить об'єм (ml), а в холодильнику вага (g) - прирівнюємо 1 до 1
+                    has_any_amount = True
+                    inv_display_unit = unit
+
+                # КУЛІНАРНА МАГІЯ: Об'єм <-> Вага
                 elif unit == 'ml' and (ing_id, 'g') in inventory_dict:
                     have_amount = inventory_dict[(ing_id, 'g')]
-                # І навпаки: якщо рецепт просить грами, а в холодильнику мілілітри
+                    has_any_amount = True
+                    inv_display_unit = 'g'
+
                 elif unit == 'g' and (ing_id, 'ml') in inventory_dict:
                     have_amount = inventory_dict[(ing_id, 'ml')]
+                    has_any_amount = True
+                    inv_display_unit = 'ml'
 
-            # Якщо кількість "За смаком" (None)
+                # МАГІЯ ДЛЯ "ЗА СМАКОМ" (taste) ТА "ДРІБОК" (pinch)
+                elif unit in ['taste', 'pinch']:
+                    for (inv_ing_id, inv_unit), inv_amount in inventory_dict.items():
+                        if inv_ing_id == ing_id and inv_amount > 0:
+                            has_any_amount = True
+                            have_amount = inv_amount
+                            inv_display_unit = inv_unit  # ВАЖЛИВО: ловимо реальні грами/мл з холодильника!
+                            break
+
+            # ================= РОЗРАХУНОК "ЩО КУПИТИ" =================
+            display_unit = unit
+
+            # Якщо рецепт просить "За смаком" (None)
             if total_req is None:
-                to_buy_base = 0
-                display_amount = None
+                # ПОРІГ БЕЗПЕКИ: вважаємо, що продукту достатньо, ТІЛЬКИ якщо його >= 15 грамів/мл
+                is_enough_for_taste = has_any_amount and have_amount >= 70
+
+                if is_enough_for_taste:
+                    # Вистачає з головою - повністю приховуємо
+                    to_buy_base = 0
+                    display_amount = 0
+                else:
+                    # Занадто мало (або зовсім немає) - треба купити.
+                    # Ставимо 1, щоб пройшло фільтр, але display_amount = None для напису "за смаком"
+                    to_buy_base = 1
+                    display_amount = None
             else:
+                # Стандартний математичний розрахунок для звичайних одиниць
                 to_buy_base = max(0, total_req - have_amount)
                 display_amount = to_buy_base
-
-            display_unit = unit
 
             # Зворотна конвертація для красивого виводу (якщо вийшло більше 1000 г, покажемо в кг)
             if display_amount is not None and display_amount > 0:
@@ -430,10 +468,12 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
                 'ingredient_name': ing_name,
                 'ingredient_image': f"/media/{image}" if image else None,
                 'unit': display_unit,
+                'inventory_unit': inv_display_unit,
                 'required_amount': total_req,
                 'already_have': have_amount,
                 'to_buy': display_amount,
-                'is_fully_stocked': to_buy_base == 0 and total_req is not None and total_req > 0,
+                # is_fully_stocked тепер враховує і "за смаком"
+                'is_fully_stocked': to_buy_base == 0,
                 '_sort_weight': to_buy_base
             })
 

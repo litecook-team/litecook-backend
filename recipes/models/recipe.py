@@ -4,6 +4,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from .ingredient import Month
 from datetime import date
+from django.core.exceptions import ValidationError
 
 # ================= КЛАСИ CHOICES ДЛЯ РЕЦЕПТІВ =================
 
@@ -189,9 +190,9 @@ class RecipeIngredient(models.Model):
     """
     Проміжна модель, яка з'єднує рецепт, інгредієнт, їх кількість та одиницю виміру.
     """
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients',
+    recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE, related_name='recipe_ingredients',
                                verbose_name="Рецепт")
-    ingredient = models.ForeignKey('recipes.Ingredient', on_delete=models.CASCADE, verbose_name="Інгредієнт")
+    ingredient = models.ForeignKey('Ingredient', on_delete=models.CASCADE, verbose_name="Інгредієнт")
 
     # Кількість (може бути пустим, якщо це "За смаком" або "Дрібка")
     amount = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Кількість")
@@ -203,6 +204,23 @@ class RecipeIngredient(models.Model):
         verbose_name_plural = "Інгредієнти в рецепті"
         # Щоб один і той самий інгредієнт не додали двічі в один рецепт
         unique_together = ('recipe', 'ingredient')
+
+    # ВАЛІДАЦІЯ
+    def clean(self):
+        super().clean()
+        if self.ingredient:
+            allowed_units = self.ingredient.get_allowed_units()
+            if self.unit not in allowed_units:
+                # Отримуємо назви дозволених одиниць
+                allowed_labels = [dict(UnitChoice.choices).get(u) for u in allowed_units]
+                raise ValidationError({
+                    'unit': f"Одиниця виміру '{self.get_unit_display()}' недопустима для інгредієнта '{self.ingredient.name}'. "
+                            f"Дозволені одиниці: {', '.join(allowed_labels)}."
+                })
+
+    def save(self, *args, **kwargs):
+        self.clean()  # Викликаємо валідацію перед кожним збереженням
+        super().save(*args, **kwargs)
 
     def __str__(self):
         if self.amount is not None:

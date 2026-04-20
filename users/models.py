@@ -3,14 +3,17 @@ from django.db import models
 from django.dispatch import receiver
 from allauth.account.signals import email_confirmed
 from allauth.socialaccount.signals import social_account_added
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save, post_delete
 from allauth.account.models import EmailAddress
 from django.contrib.postgres.fields import ArrayField
 
 from django.utils import timezone
 from datetime import timedelta
 
-from recipes.models.recipe import Diet, Cuisine, UnitChoice
+# Ваші імпорти з інших додатків
+from recipes.models.recipe import Recipe, Diet, Cuisine, UnitChoice
+from recipes.models.ingredient import Ingredient
+
 
 class CustomUserManager(BaseUserManager):
     """Кастомний менеджер для створення користувачів за email"""
@@ -76,49 +79,6 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return f"{self.first_name} ({self.email})"
 
-@receiver(email_confirmed)
-def update_user_email_verified(request, email_address, **kwargs):
-    user = email_address.user
-    user.is_email_verified = True
-    user.save(update_fields=['is_email_verified'])
-
-# Для реєстрації через Google/Facebook
-@receiver(social_account_added)
-def auto_verify_social_login(request, sociallogin, **kwargs):
-    user = sociallogin.user
-    # Оскільки це вхід через Google/Facebook, пошта вважається підтвердженою
-    if not user.is_email_verified:
-        user.is_email_verified = True
-        user.save(update_fields=['is_email_verified'])
-
-    # Також переконаємося, що в системі allauth цей email відмічений як verified
-    if user.email:
-        EmailAddress.objects.get_or_create(
-            user=user,
-            email=user.email,
-            defaults={'verified': True, 'primary': True}
-        )
-
-
-@receiver(post_save, sender=CustomUser)
-def auto_verify_superuser(sender, instance, created, **kwargs):
-    """
-    Якщо користувач створюється через консоль як Суперадмін,
-    ми автоматично створюємо йому підтверджену адресу в allauth,
-    щоб він міг одразу залогінитись через React.
-    """
-    if instance.is_superuser:
-        # Створюємо або отримуємо запис EmailAddress для allauth
-        EmailAddress.objects.get_or_create(
-            user=instance,
-            email=instance.email,
-            defaults={'verified': True, 'primary': True}
-        )
-        # Також ставимо нашу зелену галочку в CustomUser
-        if not instance.is_email_verified:
-            instance.is_email_verified = True
-            instance.save(update_fields=['is_email_verified'])
-
 
 class UserIngredient(models.Model):
     """Модель для зберігання інгредієнтів, які є у користувача вдома (Інвентар/Холодильник)"""
@@ -173,3 +133,91 @@ class UserActivityLog(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.os} ({self.browser})"
+
+
+# =======================================================
+# СИГНАЛИ (АВТОМАТИЗАЦІЯ)
+# =======================================================
+
+@receiver(email_confirmed)
+def update_user_email_verified(request, email_address, **kwargs):
+    user = email_address.user
+    user.is_email_verified = True
+    user.save(update_fields=['is_email_verified'])
+
+# Для реєстрації через Google/Facebook
+@receiver(social_account_added)
+def auto_verify_social_login(request, sociallogin, **kwargs):
+    user = sociallogin.user
+    if not user.is_email_verified:
+        user.is_email_verified = True
+        user.save(update_fields=['is_email_verified'])
+
+    if user.email:
+        EmailAddress.objects.get_or_create(
+            user=user,
+            email=user.email,
+            defaults={'verified': True, 'primary': True}
+        )
+
+@receiver(post_save, sender=CustomUser)
+def auto_verify_superuser(sender, instance, created, **kwargs):
+    if instance.is_superuser:
+        EmailAddress.objects.get_or_create(
+            user=instance,
+            email=instance.email,
+            defaults={'verified': True, 'primary': True}
+        )
+        if not instance.is_email_verified:
+            instance.is_email_verified = True
+            instance.save(update_fields=['is_email_verified'])
+
+# === Сигнали для ФІЗИЧНОГО ВИДАЛЕННЯ ФАЙЛІВ (Аватар, Рецепти, Інгредієнти) ===
+
+@receiver(pre_save, sender=CustomUser)
+def delete_old_avatar_on_update(sender, instance, **kwargs):
+    if not instance.pk:
+        return
+    try:
+        old_user = CustomUser.objects.get(pk=instance.pk)
+    except CustomUser.DoesNotExist:
+        return
+    if old_user.avatar:
+        if not instance.avatar or old_user.avatar != instance.avatar:
+            old_user.avatar.delete(save=False)
+
+
+@receiver(post_delete, sender=Recipe)
+def delete_recipe_image_on_delete(sender, instance, **kwargs):
+    if instance.image:
+        instance.image.delete(save=False)
+
+
+@receiver(pre_save, sender=Recipe)
+def delete_old_recipe_image_on_update(sender, instance, **kwargs):
+    if not instance.pk: 
+        return
+    try:
+        old_obj = Recipe.objects.get(pk=instance.pk)
+    except Recipe.DoesNotExist:
+        return
+    if old_obj.image and (not instance.image or old_obj.image != instance.image):
+        old_obj.image.delete(save=False)
+
+
+@receiver(post_delete, sender=Ingredient)
+def delete_ingredient_image_on_delete(sender, instance, **kwargs):
+    if instance.image:
+        instance.image.delete(save=False)
+
+
+@receiver(pre_save, sender=Ingredient)
+def delete_old_ingredient_image_on_update(sender, instance, **kwargs):
+    if not instance.pk: 
+        return
+    try:
+        old_obj = Ingredient.objects.get(pk=instance.pk)
+    except Ingredient.DoesNotExist:
+        return
+    if old_obj.image and (not instance.image or old_obj.image != instance.image):
+        old_obj.image.delete(save=False)

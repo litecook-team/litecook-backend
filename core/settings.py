@@ -45,39 +45,48 @@ AWS_S3_FILE_OVERWRITE = False
 # Забираємо складні підписи з URL, щоб картинки можна було кешувати на фронтенді
 AWS_QUERYSTRING_AUTH = False
 
+# 1. СУПЕР-ФІКС ШВИДКОСТІ БЕКЕНДУ:
+# Кажемо Django самостійно клеїти URL, замість того щоб питати AWS кожен раз
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
 
-STORAGES = {
-    "default": {
-        "BACKEND": "storages.backends.s3.S3Storage",
-        "OPTIONS": {
-            "location": "media",  # Всі завантаження падатимуть у папку media/ всередині бакета
-        },
-    },
-    # Для статики (CSS/JS) поки залишаємо локальне сховище
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-    },
+# 2. ФІКС ШВИДКОСТІ БРАУЗЕРА (КЕШУВАННЯ):
+# Кажемо браузеру зберігати картинки в пам'яті на 30 днів (2592000 секунд)
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=2592000',
 }
 
-# # Сучасне налаштування для Django 4.2+
-# if os.environ.get('USE_S3') == 'True':
-#     # Використовуємо Amazon S3
-#     STORAGES = {
-#         "default": {
-#             "BACKEND": "storages.backends.s3.S3Storage",
-#             "OPTIONS": {
-#                 "location": "media",  # Всі завантаження падатимуть у папку media/ всередині бакета
-#             },
+# STORAGES = {
+#     "default": {
+#         "BACKEND": "storages.backends.s3.S3Storage",
+#         "OPTIONS": {
+#             "location": "media",  # Всі завантаження падатимуть у папку media/ всередині бакета
 #         },
-#         # Для статики (CSS/JS) поки залишаємо локальне сховище
-#         "staticfiles": {
-#             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-#         },
-#     }
-# else:
-#     # Працюємо локально (зберігаємо картинки в папку media на комп'ютері)
-#     MEDIA_URL = '/media/'
-#     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+#     },
+#     # Для статики (CSS/JS) поки залишаємо локальне сховище
+#     "staticfiles": {
+#         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+#     },
+# }
+
+# Сучасне налаштування для Django 4.2+
+if os.environ.get('USE_S3') == 'True':
+    # Використовуємо Amazon S3
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "location": "media",  # Всі завантаження падатимуть у папку media/ всередині бакета
+            },
+        },
+        # Для статики (CSS/JS) поки залишаємо локальне сховище
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+else:
+    # Працюємо локально (зберігаємо картинки в папку media на комп'ютері)
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 ALLOWED_HOSTS = ['litecook-backend.duckdns.org', '3.89.80.104', 'localhost', '127.0.0.1']

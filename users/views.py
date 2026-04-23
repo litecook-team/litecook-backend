@@ -6,6 +6,8 @@ from django.conf import settings
 from rest_framework import viewsets, permissions
 from .models import UserIngredient
 from .serializers import UserIngredientSerializer
+from dj_rest_auth.registration.views import RegisterView
+from rest_framework.throttling import AnonRateThrottle
 
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
@@ -28,3 +30,11 @@ class UserIngredientViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # При збереженні автоматично прив'язуємо інгредієнт до поточного юзера
         serializer.save(user=self.request.user)
+
+# 1. Створюємо клас блокування, який підтягує наш ліміт 'registration' з settings.py
+class RegistrationThrottle(AnonRateThrottle):
+    scope = 'registration'
+
+# 2. Перевизначаємо стандартну реєстрацію, додаючи їй наш щит
+class CustomRegisterView(RegisterView):
+    throttle_classes = [RegistrationThrottle]

@@ -138,6 +138,21 @@ class UserActivityLog(models.Model):
 
 
 # =======================================================
+class PasswordHistory(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='password_history')
+    password_hash = models.CharField(max_length=128, verbose_name="Хеш пароля")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата зміни")
+
+    class Meta:
+        verbose_name = "Історія пароля"
+        verbose_name_plural = "Історії паролів"
+        # Найновіші паролі будуть зверху
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.email} - {self.created_at}"
+
+# =======================================================
 # СИГНАЛИ (АВТОМАТИЗАЦІЯ)
 # =======================================================
 
@@ -246,3 +261,22 @@ class UnverifiedUser(CustomUser):
         proxy = True  # Це каже Django: НЕ створюй нову таблицю в базі!
         verbose_name = "Непідтверджений користувач"
         verbose_name_plural = "Непідтверджені користувачі"
+
+
+@receiver(pre_save, sender=CustomUser)
+def save_password_history(sender, instance, **kwargs):
+    if instance.pk:  # Якщо користувач вже існує в базі
+        try:
+            old_user = CustomUser.objects.get(pk=instance.pk)
+            # Якщо пароль змінився
+            if old_user.password != instance.password:
+                # Зберігаємо СТАРИЙ зашифрований пароль в історію
+                PasswordHistory.objects.create(user=instance, password_hash=old_user.password)
+
+                # Опціонально: зберігаємо тільки 5 останніх паролів, щоб не забивати базу
+                history_count = PasswordHistory.objects.filter(user=instance).count()
+                if history_count > 5:
+                    oldest_password = PasswordHistory.objects.filter(user=instance).order_by('created_at').first()
+                    oldest_password.delete()
+        except CustomUser.DoesNotExist:
+            pass

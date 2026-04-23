@@ -20,6 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
 from django.views.generic import TemplateView
+from users.views import CustomRegisterView
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='warning.html'), name='home-warning'),
@@ -30,6 +31,9 @@ urlpatterns = [
 
     # АУТЕНТИФІКАЦІЯ (JWT, Логін, Реєстрація, Підтвердження пошти)
     path('api/auth/', include('dj_rest_auth.urls')),
+    # === НАША ЗАХИЩЕНА РЕЄСТРАЦІЯ ===
+    # Вона перехопить запит на реєстрацію і відсіє ботів
+    path('api/auth/registration/', CustomRegisterView.as_view(), name='custom_register'),
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
 
     path('api/auth/password/reset/confirm/<uidb64>/<token>/',

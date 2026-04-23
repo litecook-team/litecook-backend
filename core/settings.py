@@ -183,6 +183,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+    # === ВАЛІДАТОР ІСТОРІЇ ПАРОЛІВ ===
+    {
+        'NAME': 'users.validators.PasswordHistoryValidator',
+    },
 ]
 
 # Internationalization
@@ -215,12 +219,9 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 
-    # === ДОДАЄМО ЗАХИСТ ВІД БОТІВ (THROTTLING) ===
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle', # Для неавторизованих (гостей/ботів)
-    ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '6/hour', # Бот не зможе створити більше 6 акаунтів на годину
+        'registration': '6/hour',  # 6 реєстрацій на годину для одного IP
+        # 'anon': '100/minute', # Тимчасово для тестів.
     }
 }
 

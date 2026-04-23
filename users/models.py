@@ -14,6 +14,8 @@ from datetime import timedelta
 from recipes.models.recipe import Recipe, Diet, Cuisine, UnitChoice
 from recipes.models.ingredient import Ingredient
 
+from allauth.account.signals import user_signed_up
+
 
 class CustomUserManager(BaseUserManager):
     """Кастомний менеджер для створення користувачів за email"""
@@ -145,9 +147,25 @@ def update_user_email_verified(request, email_address, **kwargs):
     user.is_email_verified = True
     user.save(update_fields=['is_email_verified'])
 
-# Для реєстрації через Google/Facebook
+
+# 1. Спрацьовує при ПЕРШІЙ РЕЄСТРАЦІЇ через Google/Facebook
+@receiver(user_signed_up)
+def auto_verify_new_social_login(request, user, **kwargs):
+    # Якщо в kwargs є 'sociallogin', значить це вхід через соцмережу
+    if 'sociallogin' in kwargs:
+        user.is_email_verified = True
+        user.save(update_fields=['is_email_verified'])
+
+        EmailAddress.objects.get_or_create(
+            user=user,
+            email=user.email,
+            defaults={'verified': True, 'primary': True}
+        )
+
+
+# 2. Спрацьовує, якщо існуючий юзер просто прив'язує соцмережу
 @receiver(social_account_added)
-def auto_verify_social_login(request, sociallogin, **kwargs):
+def auto_verify_linked_social_login(request, sociallogin, **kwargs):
     user = sociallogin.user
     if not user.is_email_verified:
         user.is_email_verified = True

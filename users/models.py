@@ -239,3 +239,10 @@ def delete_old_ingredient_image_on_update(sender, instance, **kwargs):
         return
     if old_obj.image and (not instance.image or old_obj.image != instance.image):
         old_obj.image.delete(save=False)
+
+
+class UnverifiedUser(CustomUser):
+    class Meta:
+        proxy = True  # Це каже Django: НЕ створюй нову таблицю в базі!
+        verbose_name = "Непідтверджений користувач"
+        verbose_name_plural = "Непідтверджені користувачі"

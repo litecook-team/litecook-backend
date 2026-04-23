@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import CustomUser, UserIngredient, UserActivityLog
+from .models import CustomUser, UserIngredient, UserActivityLog, UnverifiedUser
 from rest_framework_simplejwt.tokens import OutstandingToken
 
 class UserIngredientInline(admin.TabularInline):
@@ -32,12 +32,15 @@ class CustomUserAdmin(admin.ModelAdmin):
     # Підключаємо інвентар до сторінки юзера
     inlines = [UserIngredientInline, UserActivityLogInline]
 
-    # 1. ЗАХИСТ ВІДОБРАЖЕННЯ: Звичайні адміни не будуть бачити Суперадмінів у списку взагалі
+    # 1. ЗАХИСТ ВІДОБРАЖЕННЯ ТА РОЗДІЛЕННЯ:
     def get_queryset(self, request):
-        qs = super().get_queryset(request)
+        # Одразу фільтруємо так, щоб показувати ТІЛЬКИ підтверджених
+        qs = super().get_queryset(request).filter(is_email_verified=True)
+
         if not request.user.is_superuser:
-            # Виключаємо всіх суперадмінів з видачі
+            # Виключаємо всіх суперадмінів з видачі для звичайних адмінів
             return qs.exclude(is_superuser=True)
+
         return qs
 
     # 2. ЗАХИСТ РЕДАГУВАННЯ: Хто кого може змінювати
@@ -96,3 +99,18 @@ class CustomUserAdmin(admin.ModelAdmin):
             self.message_user(request, "Сесії успішно анульовані.")
         except Exception as e:
             self.message_user(request, "Помилка (впевніться що token_blacklist встановлено у settings.py)", level='error')
+
+
+@admin.register(UnverifiedUser)
+class UnverifiedUserAdmin(admin.ModelAdmin):
+    list_display = ('email', 'first_name', 'date_joined')
+    ordering = ('-date_joined',)
+    actions = ['delete_selected'] # Дозволяємо лише видаляти
+
+    # ОСНОВНА МАГІЯ: Фільтруємо так, щоб тут показувало ТІЛЬКИ непідтверджених
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(is_email_verified=False)
+
+    # Забороняємо створювати юзерів через цю "віртуальну" таблицю
+    def has_add_permission(self, request):
+        return False

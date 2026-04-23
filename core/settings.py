@@ -214,6 +214,14 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+
+    # === ДОДАЄМО ЗАХИСТ ВІД БОТІВ (THROTTLING) ===
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle', # Для неавторизованих (гостей/ботів)
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '6/hour', # Бот не зможе створити більше 6 акаунтів на годину
+    }
 }
 
 # Налаштування JWT токенів

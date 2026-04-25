@@ -93,6 +93,10 @@ EXACT_UNIT_MATCH = {
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=150, unique=True, verbose_name="Назва інгредієнта")
+    name_en = models.CharField(max_length=150, blank=True, null=True, verbose_name="Назва (EN)")
+    name_pl = models.CharField(max_length=150, blank=True, null=True, verbose_name="Назва (PL)")
+    # =================================
+
     image = models.ImageField(upload_to='ingredients/images/', blank=True, null=True, verbose_name="Фото інгредієнта")
     category = models.CharField(
         max_length=50,

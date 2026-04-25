@@ -19,6 +19,47 @@ from .models.ingredient import Ingredient
 from .models.recipe import Recipe, Difficulty
 from .serializers import IngredientSerializer, RecipeSerializer, FavoriteSerializer, WeeklyMenuSerializer, RecipeMatchSerializer
 
+# === ФУНКЦІЯ ДЛЯ ПРОСТОГО ПЕРЕКЛАДУ ПОВІДОМЛЕНЬ API ===
+def t_view(key, request):
+    lang = getattr(request, 'LANGUAGE_CODE', 'uk')[:2] if request else 'uk'
+    msgs = {
+        'no_recipes': {
+            'uk': "Рецептів не знайдено",
+            'en': "No recipes found",
+            'pl': "Nie znaleziono przepisów"
+        },
+        'not_found': {
+            'uk': "Запис не знайдено",
+            'en': "Record not found",
+            'pl': "Nie znaleziono rekordu"
+        },
+        'email_req': {
+            'uk': "Email та файл обов'язкові",
+            'en': "Email and file are required",
+            'pl': "E-mail i plik są wymagane"
+        },
+        'sent': {
+            'uk': "Відправлено на пошту!",
+            'en': "Sent to email!",
+            'pl': "Wysłano na e-mail!"
+        },
+        'not_in_menu': {
+            'uk': "Рецепт не знайдено в меню",
+            'en': "Recipe not found in menu",
+            'pl': "Przepis nie znaleziony w menu"
+        },
+        'pdf_subject': {
+            'uk': "Ваш список продуктів | LITE cook",
+            'en': "Your shopping list | LITE cook",
+            'pl': "Twoja lista zakupów | LITE cook"
+        },
+        'pdf_body': {
+            'uk': "Привіт! Ваш красивий список продуктів у прикріпленому PDF-файлі. Зручних та смачних покупок!",
+            'en': "Hello! Your shopping list is attached as a PDF file. Happy and tasty shopping!",
+            'pl': "Cześć! Twoja lista zakupów znajduje się w załączonym pliku PDF. Udanych zakupów!"
+        }
+    }
+    return msgs.get(key, {}).get(lang, msgs.get(key, {}).get('uk'))
 
 # ================= ПОТУЖНИЙ КАСТОМНИЙ ФІЛЬТР РЕЦЕПТІВ =================
 class RecipeFilter(FilterSet):
@@ -53,12 +94,9 @@ class RecipeFilter(FilterSet):
 
     # Метод обробки нашого розумного пошуку
     def filter_search_query(self, queryset, name, value):
-        if not value:
-            return queryset
-
+        if not value: return queryset
         # Якщо це запит на /match/, ми не фільтруємо тут, бо match робить це сам!
-        if 'match' in self.request.path:
-            return queryset
+        if 'match' in self.request.path: return queryset
 
         # Якщо є кома, розбиваємо по комі. Якщо ні - по пробілу.
         if ',' in value:
@@ -200,7 +238,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         # Перевірка на випадок, якщо база рецептів взагалі порожня
         if not recipe:
-            return Response({"detail": "Рецептів не знайдено"}, status=404)
+            return Response({"detail": t_view('no_recipes', request)}, status=404)
 
         # 3. Віддаємо рецепт як зазвичай
         serializer = self.get_serializer(recipe)
@@ -303,7 +341,7 @@ class FavoriteViewSet(viewsets.ModelViewSet):
             self.perform_destroy(instance)
             return Response(status=204)
         except FavoriteRecipe.DoesNotExist:
-            return Response({"error": "Запис не знайдено"}, status=404)
+            return Response({"error": t_view('not_found', request)}, status=404)
 
 
 class WeeklyMenuViewSet(viewsets.ModelViewSet):
@@ -489,14 +527,12 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
         pdf_file = request.FILES.get('pdf_file')
 
         if not email or not pdf_file:
-            return Response({"error": "Email та файл обов'язкові"}, status=400)
+            return Response({"error": t_view('email_req', request)}, status=400)
 
-        # 1. Текстова версія (якщо пошта не підтримує HTML)
-        text_content = "Привіт! Ваш красивий список продуктів у прикріпленому PDF-файлі. Зручних та смачних покупок!"
-
-        # 2. Передаємо frontend_url, щоб у листі завантажився ваш фірмовий фон 'exit.jpg'
+        # Передаємо frontend_url, щоб у листі завантажився ваш фірмовий фон 'exit.jpg'
         context = {
             'frontend_url': settings.FRONTEND_URL,
+            'lang': getattr(request, 'LANGUAGE_CODE', 'uk')[:2]
         }
 
         # 3. Рендеримо нашу нову красиву HTML-версію
@@ -504,8 +540,8 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
 
         # 4. Формуємо лист
         mail = EmailMultiAlternatives(
-            subject="Ваш список продуктів | LITE cook",
-            body=text_content,
+            subject=t_view('pdf_subject', request),
+            body=t_view('pdf_body', request),
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[email]
         )
@@ -517,7 +553,7 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
         # 6. Відправляємо
         mail.send()
 
-        return Response({"message": "Відправлено на пошту!"})
+        return Response({"message": t_view('sent', request)})
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -529,4 +565,4 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
 
         if deleted:
             return Response(status=204)  # 204 No Content - успішне видалення
-        return Response({"error": "Рецепт не знайдено в меню"}, status=404)
+        return Response({"error": t_view('not_in_menu', request)}, status=404)

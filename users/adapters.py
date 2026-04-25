@@ -16,25 +16,34 @@ class CustomAccountAdapter(DefaultAccountAdapter):
 
     # 3. ВЛАСНА ВІДПРАВКА ЛИСТА ПІДТВЕРДЖЕННЯ З HTML-ДИЗАЙНОМ
     def send_confirmation_mail(self, request, emailconfirmation, signup):
-        # Отримуємо згенероване посилання
         activate_url = self.get_email_confirmation_url(request, emailconfirmation)
 
-        # Передаємо посилання в наш HTML-шаблон
+        # 1. Отримуємо мову з заголовків (за замовчуванням 'uk')
+        lang = getattr(request, 'LANGUAGE_CODE', 'uk')[:2]
+
+        # 2. Передаємо мову в HTML шаблон
         context = {
             'activate_url': activate_url,
             'frontend_url': settings.FRONTEND_URL,
+            'lang': lang,
         }
-
-        # Рендеримо HTML
         html_content = render_to_string('registration/email_confirmation_message.html', context)
 
-        # Текстова версія (якщо пошта юзера не підтримує HTML)
-        text_content = f"Вітаємо у LITE cook!\nДякуємо за реєстрацію. Підтвердіть свою електронну пошту: {activate_url}"
+        # 3. Словники для теми та тексту (без використання GNU gettext)
+        subjects = {
+            'en': "Registration Confirmation at LITE cook",
+            'pl': "Potwierdzenie rejestracji w LITE cook",
+            'uk': "Підтвердження реєстрації у LITE cook"
+        }
+        texts = {
+            'en': f"Welcome to LITE cook!\nConfirm your email: {activate_url}",
+            'pl': f"Witamy w LITE cook!\nPotwierdź swój adres e-mail: {activate_url}",
+            'uk': f"Вітаємо у LITE cook!\nДякуємо за реєстрацію. Підтвердіть свою електронну пошту: {activate_url}"
+        }
 
-        # Відправляємо лист!
         msg = EmailMultiAlternatives(
-            subject="Підтвердження реєстрації у LITE cook",
-            body=text_content,
+            subject=subjects.get(lang, subjects['uk']),
+            body=texts.get(lang, texts['uk']),
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[emailconfirmation.email_address.email]
         )

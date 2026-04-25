@@ -1,28 +1,38 @@
 <div style="background-color: #f9fafb; background-image: url('{{ frontend_url }}/exit.jpg'); background-size: cover; background-position: center; padding: 60px 20px; font-family: 'Arial', sans-serif; text-align: center;">
-
     <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.1);">
 
-        <h1 style="font-size: 32px; color: #1A1A1A; margin-bottom: 5px; font-weight: 900; letter-spacing: 2px;">
-            L I T E &nbsp; c o o k
-        </h1>
+        <h1 style="font-size: 32px; color: #1A1A1A; margin-bottom: 5px; font-weight: 900; letter-spacing: 2px;">L I T E &nbsp; c o o k</h1>
+
         <p style="color: #974F23; font-weight: bold; margin-top: 0; margin-bottom: 30px;">
-            Твій особистий шеф-кухар
+            {% if lang == 'en' %}Your personal chef
+            {% elif lang == 'pl' %}Twój osobisty szef kuchni
+            {% else %}Твій особистий шеф-кухар{% endif %}
         </p>
 
-        <h2 style="color: #1A1A1A; font-size: 24px; margin-bottom: 15px;">Вітаємо!</h2>
+        <h2 style="color: #1A1A1A; font-size: 24px; margin-bottom: 15px;">
+            {% if lang == 'en' %}Welcome!
+            {% elif lang == 'pl' %}Witamy!
+            {% else %}Вітаємо!{% endif %}
+        </h2>
 
         <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
-            Дякуємо за реєстрацію! Щоб отримати доступ до підбору рецептів та планування тижневого меню, будь ласка, підтвердіть свою електронну пошту.
+            {% if lang == 'en' %}Thank you for registering! To access recipe selection and weekly menu planning, please confirm your email.
+            {% elif lang == 'pl' %}Dziękujemy za rejestrację! Aby uzyskać dostęp do wyboru przepisów i planowania menu, potwierdź swój e-mail.
+            {% else %}Дякуємо за реєстрацію! Щоб отримати доступ до підбору рецептів та планування тижневого меню, будь ласка, підтвердіть свою електронну пошту.{% endif %}
         </p>
 
         <a href="{{ activate_url }}" style="display: inline-block; background-color: #1A1A1A; color: #ffffff; padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: bold; margin-bottom: 30px;">
-            Підтвердити пошту
+            {% if lang == 'en' %}Confirm Email
+            {% elif lang == 'pl' %}Potwierdź e-mail
+            {% else %}Підтвердити пошту{% endif %}
         </a>
 
         <hr style="border: none; border-top: 1px solid #e5e7eb; margin-bottom: 20px;">
 
         <p style="color: #9ca3af; font-size: 12px; line-height: 1.5;">
-            Якщо кнопка не працює, скопіюйте це посилання та вставте у браузер:<br>
+            {% if lang == 'en' %}If the button doesn't work, copy and paste this link:<br>
+            {% elif lang == 'pl' %}Jeśli przycisk nie działa, skopiuj i wklej ten link:<br>
+            {% else %}Якщо кнопка не працює, скопіюйте це посилання та вставте у браузер:<br>{% endif %}
             <a href="{{ activate_url }}" style="color: #42705D; word-break: break-all;">{{ activate_url }}</a>
         </p>
     </div>

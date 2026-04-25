@@ -104,6 +104,13 @@ class UnitChoice(models.TextChoices):
 class Recipe(models.Model):
     title = models.CharField(max_length=200, verbose_name="Назва рецепта")
     description = models.TextField(verbose_name="Опис")
+
+    title_en = models.CharField(max_length=200, blank=True, null=True, verbose_name="Назва (EN)")
+    title_pl = models.CharField(max_length=200, blank=True, null=True, verbose_name="Назва (PL)")
+    description_en = models.TextField(blank=True, null=True, verbose_name="Опис (EN)")
+    description_pl = models.TextField(blank=True, null=True, verbose_name="Опис (PL)")
+    # =================================
+
     image = models.ImageField(upload_to='recipes/images/', verbose_name="Фото рецепта")
 
     source = models.CharField(
@@ -114,6 +121,9 @@ class Recipe(models.Model):
         help_text="Вкажіть автора, ресторан або додайте посилання (URL) на оригінал"
     )
 
+    source_en = models.CharField(max_length=500, blank=True, null=True, verbose_name="Джерело (EN)")
+    source_pl = models.CharField(max_length=500, blank=True, null=True, verbose_name="Джерело (PL)")
+
     cooking_time = models.PositiveIntegerField(verbose_name="Час приготування (хв)")
     portions = models.PositiveIntegerField(default=1, verbose_name="Кількість порцій")
     calories = models.PositiveIntegerField(verbose_name="Калорії на 1 порцію")
@@ -122,34 +132,11 @@ class Recipe(models.Model):
 
     # поля для автоматичної сезонності
     is_seasonal = models.BooleanField(default=False, verbose_name="Сезонний рецепт")
-    seasonal_months = ArrayField(
-        models.IntegerField(choices=Month.choices),
-        blank=True, default=list,
-        verbose_name="Сезонні місяці"
-    )
-
-    cuisine = ArrayField(
-        models.CharField(max_length=50, choices=Cuisine.choices),
-        blank=True, default=list,
-        verbose_name="Кухня"
-    )
-
-    # Множинний вибір (ArrayField з TextChoices)
-    meal_times = ArrayField(
-        models.CharField(max_length=20, choices=MealTime.choices),
-        blank=True, default=list,
-        verbose_name="Прийом їжі"
-    )
-    dietary_tags = ArrayField(
-        models.CharField(max_length=30, choices=Diet.choices),
-        blank=True, default=list,
-        verbose_name="Тип харчування / Дієта"
-    )
-    dish_types = ArrayField(
-        models.CharField(max_length=30, choices=DishType.choices),
-        blank=True, default=list,
-        verbose_name="Типи страв"
-    )
+    seasonal_months = ArrayField(models.IntegerField(choices=Month.choices), blank=True, default=list)
+    cuisine = ArrayField(models.CharField(max_length=50, choices=Cuisine.choices), blank=True, default=list)
+    meal_times = ArrayField(models.CharField(max_length=20, choices=MealTime.choices), blank=True, default=list)
+    dietary_tags = ArrayField(models.CharField(max_length=30, choices=Diet.choices), blank=True, default=list)
+    dish_types = ArrayField(models.CharField(max_length=30, choices=DishType.choices), blank=True, default=list)
 
     ingredients = models.ManyToManyField('recipes.Ingredient', through='RecipeIngredient', related_name='recipes')
 
@@ -243,6 +230,9 @@ class RecipeStep(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='steps', verbose_name="Рецепт")
     step_number = models.PositiveIntegerField(verbose_name="Номер кроку")
     text = models.TextField(verbose_name="Опис кроку")
+
+    text_en = models.TextField(blank=True, null=True, verbose_name="Опис кроку (EN)")
+    text_pl = models.TextField(blank=True, null=True, verbose_name="Опис кроку (PL)")
 
     class Meta:
         verbose_name = "Крок приготування"

@@ -108,8 +108,8 @@ RECIPES_DATA = [
     },
     {
         "title": "Куряче філе з лимоном та зеленню",
-        "title_en": "Chicken fillet with lemon and greens",
-        "title_pl": "Filet z kurczaka z cytryną i zieleniną",
+        "title_en": "Chicken fillet with lemon and herbs",
+        "title_pl": "Filet z kurczaka z cytryną i ziołami",
         "description": "Соковите куряче філе з ніжним цитрусовим ароматом і свіжою зеленню. Легка у приготуванні страва, яка чудово підходить для обіду або вечері.",
         "description_en": "Juicy chicken fillet with a delicate citrus aroma and fresh herbs. An easy-to-prepare dish that is perfect for lunch or dinner.",
         "description_pl": "Soczysty filet z kurczaka z delikatnym cytrusowym aromatem i świeżymi ziołami. Łatwe w przygotowaniu danie, idealne na obiad lub kolację.",
@@ -157,7 +157,7 @@ RECIPES_DATA = [
     },
     {
         "title": "Салат з кіноа, авокадо та овочами",
-        "title_en": "Quinoa, avocado, and vegetable salad",
+        "title_en": "Quinoa salad with avocado and vegetables",
         "title_pl": "Sałatka z komosy ryżowej, awokado i warzyw",
         "description": "Свіжий і поживний салат із кіноа та овочів, який поєднує користь і насичений смак. Легкий, але ситний варіант для обіду або вечері.",
         "description_en": "A fresh and nutritious salad with quinoa and vegetables, combining health and rich taste. A light but satisfying option for lunch or dinner.",
@@ -209,7 +209,7 @@ RECIPES_DATA = [
     },
     {
         "title": "Смузі з бананом та шпинатом",
-        "title_en": "Smoothie with banana and spinach",
+        "title_en": "Banana and spinach smoothie",
         "title_pl": "Smoothie z bananem i szpinakiem",
         "description": "Освіжаючий і корисний напій, який поєднує солодкість банана та користь зелені. Ідеальний варіант для швидкого сніданку.",
         "description_en": "A refreshing and healthy drink that combines the sweetness of banana and the benefits of greens. Perfect for a quick breakfast.",
@@ -401,7 +401,7 @@ RECIPES_DATA = [
     {
         "title": "Лосось запечений з овочами",
         "title_en": "Baked salmon with vegetables",
-        "title_pl": "Pieczony łosoś z warzywami",
+        "title_pl": "Łosoś pieczony z warzywami",
         "description": "Ніжний лосось у поєднанні з овочами — корисна та збалансована страва. Ідеальний варіант для легкої вечері або здорового обіду.",
         "description_en": "Tender salmon combined with vegetables is a healthy and balanced dish. Perfect for a light dinner or a healthy lunch.",
         "description_pl": "Delikatny łosoś w połączeniu z warzywami to zdrowe i zbilansowane danie. Idealne na lekką kolację lub zdrowy lunch.",
@@ -602,7 +602,7 @@ RECIPES_DATA = [
     {
         "title": "Український борщ",
         "title_en": "Ukrainian borscht",
-        "title_pl": "Ukraiński barszcz",
+        "title_pl": "Barszcz ukraiński",
         "description": "Традиційна українська страва з насиченим смаком і ароматом. Ситний і поживний суп, який ідеально підходить для обіду.",
         "description_en": "A traditional Ukrainian dish with rich flavor and aroma. A hearty and nutritious soup that is perfect for lunch.",
         "description_pl": "Tradycyjne ukraińskie danie o bogatym smaku i aromacie. Sycąca i pożywna zupa, idealna na obiad.",
@@ -659,7 +659,7 @@ RECIPES_DATA = [
     },
     {
         "title": "Французький омлет з сиром",
-        "title_en": "French cheese omelette",
+        "title_en": "French omelette with cheese",
         "title_pl": "Francuski omlet z serem",
         "description": "Ніжний і повітряний омлет із розплавленим сиром — класичний варіант швидкого сніданку. Легка текстура та насичений смак.",
         "description_en": "A delicate and airy omelette with melted cheese - a classic quick breakfast. Light texture and rich flavor.",
@@ -1012,8 +1012,8 @@ RECIPES_DATA = [
     },
     {
         "title": "Сирники",
-        "title_en": "Syrnyky (Cottage cheese pancakes)",
-        "title_pl": "Placuszki serowe (Syrnyki)",
+        "title_en": "Cheesecakes",
+        "title_pl": "Placuszki serowe",
         "description": "Традиційна страва з ніжного сиру з рум'яною скоринкою та м'якою текстурою всередині. Ідеально підходять для сніданку.",
         "description_en": "A traditional dish made of delicate cottage cheese with a golden crust and soft texture inside. Perfect for breakfast.",
         "description_pl": "Tradycyjne danie z delikatnego twarogu z rumianą skórką i miękkim wnętrzem. Idealne na śniadanie.",
@@ -1104,7 +1104,7 @@ RECIPES_DATA = [
     },
     {
         "title": "Вареники з картоплею",
-        "title_en": "Varenyky (Dumplings) with potatoes",
+        "title_en": "Varenyky with potatoes",
         "title_pl": "Pierogi z ziemniakami",
         "description": "Класична українська страва з ніжним тістом і ситною картопляною начинкою. Домашній смак і аромат роблять її ідеальним вибором для обіду.",
         "description_en": "A classic Ukrainian dish with delicate dough and a hearty potato filling. Homemade taste and aroma make it an ideal choice for lunch.",

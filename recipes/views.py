@@ -57,6 +57,11 @@ def t_view(key, request):
             'uk': "Привіт! Ваш красивий список продуктів у прикріпленому PDF-файлі. Зручних та смачних покупок!",
             'en': "Hello! Your shopping list is attached as a PDF file. Happy and tasty shopping!",
             'pl': "Cześć! Twoja lista zakupów znajduje się w załączonym pliku PDF. Udanych zakupów!"
+        },
+        'ai_quota': {
+            'uk': "LITE cook AI наразі перевантажений (вичерпано ліміт запитів). Будь ласка, зачекайте хвилинку і спробуйте знову! ⏳",
+            'en': "The AI assistant is currently overloaded (request limit reached). Please wait a minute and try again! ⏳",
+            'pl': "Asystent AI jest obecnie przeciążony (osiągnięto limit zapytań). Poczekaj minutę i spróbuj ponownie! ⏳"
         }
     }
     return msgs.get(key, {}).get(lang, msgs.get(key, {}).get('uk'))

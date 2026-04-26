@@ -591,3 +591,142 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
         if deleted:
             return Response(status=204)  # 204 No Content - успішне видалення
         return Response({"error": t_view('not_in_menu', request)}, status=404)
+
+
+# ================= АСИСТЕНТ GEMINI AI =================
+import os
+import google.generativeai as genai
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.throttling import UserRateThrottle
+from users.models import SiteSettings
+
+
+class AIChatThrottle(UserRateThrottle):
+    rate = '30/minute'  # Захист від спаму: не більше 30 повідомлень на хвилину від юзера
+
+
+class AIChatView(APIView):
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [AIChatThrottle]
+
+    # GET-метод, щоб фронтенд міг дізнатися чи увімкнений ШІ
+    def get(self, request):
+        settings_obj = SiteSettings.load()
+        return Response({"is_enabled": settings_obj.is_ai_enabled})
+
+    def post(self, request):
+        # Перевіряємо чи адмін не вимкнув чат
+        settings_obj = SiteSettings.load()
+        if not settings_obj.is_ai_enabled:
+            return Response({"error": "AI-асистент тимчасово вимкнений адміністратором."}, status=403)
+
+        user_message = request.data.get('message')
+        current_path = request.data.get('current_path', '/')
+        chat_history = request.data.get('history', [])
+
+        if not user_message:
+            return Response({"error": "Повідомлення порожнє"}, status=400)
+
+        page_context = self.get_page_context(current_path)
+
+        # === ВДОСКОНАЛЕНА ІНСТРУКЦІЯ ДЛЯ ШІ ===
+        system_instruction = f"""
+Ти — 'LITE cook AI', привітний, стильний та лаконічний персональний кулінарний асистент платформи LITE cook.
+Твоє завдання — допомагати користувачу, надихати його на готування та чітко відповідати на запитання про сайт.
+
+СТРУКТУРА САЙТУ ТА ПОСИЛАННЯ (ЗАВЖДИ ВИКОРИСТОВУЙ ЇХ, ЯКЩО РЕКОМЕНДУЄШ СТОРІНКУ):
+- [Головна сторінка](/)
+- [Підібрати рецепт](/recipes)
+- [Улюблені](/favorites)
+- [Тижневе меню](/menu)
+- [Мій профіль](/profile)
+- [Про нас](/about)
+- [Політика конфіденційності](/privacy) (має підсторінки: Збір даних, Використання, Куки, Контроль, Переглянути повністю)
+
+ІНФОРМАЦІЯ ПРО ПРОЄКТ:
+LITE cook — це сучасна платформа для підбору рецептів на основі інгредієнтів, що є вдома у користувача, з можливістю планування тижневого меню та генерації списку покупок у PDF.
+
+ЄДИНІ 10 ФІЛЬТРІВ НА СТОРІНЦІ "ПІДІБРАТИ РЕЦЕПТ":
+1. Інгредієнти (це теж фільтр)
+2. Групи продуктів
+3. Прийом їжі
+4. Тип страви
+5. Кухня
+6. Складність
+7. Час приготування
+8. Калорійність
+9. Дієтичні обмеження
+10. Сезонність
+
+КОНТЕКСТ КОРИСТУВАЧА:
+Зараз користувач знаходиться за адресою: {current_path}.
+Деталі: {page_context}.
+
+ПРАВИЛА ПОВЕДІНКИ (СУВОРО!):
+1. Відповідай коротко, лаконічно, без "води" (максимум 1-3 невеликі абзаци).
+2. Якщо перераховуєш фільтри або функції — роби один звичайний маркований список. НІКОЛИ не роби вкладених багаторівневих списків.
+3. Згадуючи сторінку сайту, ОБОВ'ЯЗКОВО роби її клікабельною (використовуй Markdown: [Назва сторінки](/url)).
+4. Відповідай ТІЛЬКИ на теми кулінарії та функціоналу LITE cook. На інші теми тактовно відмовляй: "Вибачте, я фахівець виключно з кулінарії та платформи LITE cook ✨".
+"""
+
+        try:
+            if not getattr(settings, 'GEMINI_API_KEY', None) and not os.environ.get("GEMINI_API_KEY"):
+                print("ПОМИЛКА: Ключ GEMINI_API_KEY не знайдено!")
+                return Response({"error": "Ключ ШІ не налаштовано."}, status=500)
+
+            genai.configure(api_key=getattr(settings, 'GEMINI_API_KEY', os.environ.get("GEMINI_API_KEY")))
+
+            target_model = "gemini-2.0-flash"
+            for m in genai.list_models():
+                if 'generateContent' in m.supported_generation_methods and 'flash' in m.name.lower():
+                    target_model = m.name
+                    break
+
+            model = genai.GenerativeModel(
+                model_name=target_model,
+                system_instruction=system_instruction
+            )
+
+            formatted_history = []
+            for msg in chat_history:
+                role = "user" if msg['role'] == 'user' else "model"
+                formatted_history.append({"role": role, "parts": [msg['text']]})
+
+            chat = model.start_chat(history=formatted_history)
+            response = chat.send_message(user_message)
+
+            return Response({"reply": response.text})
+
+        except Exception as e:
+            error_msg = str(e)
+            print("Gemini Error:", error_msg)
+            return Response({"error": error_msg}, status=500)
+
+    def get_page_context(self, path):
+        # ФІКС: Виправили опис сторінки рецептів
+        if 'profile' in path:
+            return "Тут користувач може керувати аватаром, іменем, паролем, алергіями, улюбленими кухнями та дієтами. А також вести віртуальний холодильник ('Мої продукти') і читати кулінарні поради."
+        elif 'menu' in path:
+            return "Тут користувач планує страви на тиждень і генерує PDF список покупок (враховуючи свій віртуальний холодильник)."
+        elif 'recipes' in path:
+            return "Це сторінка пошуку. Тут користувач підбирає рецепти, використовуючи 10 доступних фільтрів (включаючи пошук за конкретними інгредієнтами)."
+        elif 'favorites' in path:
+            return "Тут зберігаються улюблені рецепти користувача."
+        elif 'about' in path:
+            return "Це сторінка 'Про нас'."
+        elif 'privacy' in path:
+            return "Це сторінка 'Політика конфіденційності'."
+        return "Це загальна сторінка сайту."
+
+    # def get_page_context(self, path):
+    #     # Маппінг шляхів до описів
+    #     if 'profile' in path:
+    #         return "Користувач у своєму профілі. Він може додавати, змінювати, видаляти аватарку (своє фотозображення), редагувати ім'я, міняти пароль, додавати алергії (інгредієнти на які у користувача алергії), дієти (харчові обмеження яких дотримується користувач, наприклад користувач вегетаріанець) або наповнювати свій віртуальний холодильник (Мої продукти, додавати продукти які є у користувача вдома). Також може ознайомитися із порадами (всього 3 поради) від LITE cook, а також бачити статистику по своїх улюблених рецептах, кухнях, алергіях, харчових обмеженнях, його продуктах (кількість)."
+    #     elif 'menu' in path:
+    #         return "Користувач на сторінці Тижневого меню. Він може розпланувати рецепти по днях тижня та прийомах їжі, а також згенерувати список покупок на конкретний день або цілий тиждень (з урахуванням або без урахування його продуктів в холодильнику)."
+    #     elif 'recipes' in path:
+    #         return "Користувач на сторінці пошуку рецептів. Тут він може шукати рецепти за наявними інгредієнтами або використовувати фільтри (кухня, складність, сезонність, групи продуктів, прийом їжі, тип страви, час приготування, калорійність, дієтичні обмеження)."
+    #     elif 'favorites' in path:
+    #         return "Користувач переглядає свої збережені (улюблені) рецепти."
+    #     return "Користувач на головній або загальній сторінці сайту. Він бачить рецепт дня від LITE cook, а також три переваги чому варто користуватися саме сайтом LITE cook."

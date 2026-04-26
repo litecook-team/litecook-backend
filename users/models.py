@@ -280,3 +280,22 @@ def save_password_history(sender, instance, **kwargs):
                     oldest_password.delete()
         except CustomUser.DoesNotExist:
             pass
+
+class SiteSettings(models.Model):
+    is_ai_enabled = models.BooleanField(default=True, verbose_name="Увімкнути ШІ-асистента")
+
+    class Meta:
+        verbose_name = "Налаштування сайту"
+        verbose_name_plural = "Налаштування сайту"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1  # Гарантуємо, що буде лише один запис в базі
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        pass  # Забороняємо випадкове видалення налаштувань
+
+    @classmethod
+    def load(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj

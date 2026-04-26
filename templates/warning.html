@@ -19,119 +19,120 @@
             transition: background-color 0.5s;
         }
 
-        /* Стиль для моменту "блокування" */
-        body.locked {
-            background-color: #aa0000;
-            color: #ffffff;
-        }
+        body.locked { background-color: #aa0000; color: #ffffff; }
 
         .scanline {
-            width: 100%;
-            height: 100px;
-            z-index: 10;
-            position: absolute;
-            pointer-events: none;
+            width: 100%; height: 100px; z-index: 10; position: absolute; pointer-events: none;
             background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(255,0,0,0.2) 50%, rgba(0,0,0,0) 100%);
-            opacity: 0.1;
-            animation: scanline 6s linear infinite;
+            opacity: 0.1; animation: scanline 6s linear infinite;
         }
 
-        @keyframes scanline {
-            0% { top: -100px; }
-            100% { top: 100%; }
-        }
+        @keyframes scanline { 0% { top: -100px; } 100% { top: 100%; } }
 
         .warning-container {
-            border: 2px solid #ff3333;
-            padding: 40px 60px;
-            background: rgba(20, 0, 0, 0.8);
+            border: 2px solid #ff3333; padding: 40px 60px; background: rgba(20, 0, 0, 0.8);
             box-shadow: 0 0 30px rgba(255, 0, 0, 0.4), inset 0 0 20px rgba(255, 0, 0, 0.2);
-            text-align: center;
-            position: relative;
-            z-index: 20;
-            animation: pulse 2s infinite;
+            text-align: center; position: relative; z-index: 20; animation: pulse 2s infinite;
         }
 
-        /* Прибираємо тіні при "блокуванні" */
-        body.locked .warning-container {
-            border-color: #fff;
-            background: transparent;
-            box-shadow: none;
-            animation: none;
-        }
+        body.locked .warning-container { border-color: #fff; background: transparent; box-shadow: none; animation: none; }
 
-        h1 {
-            font-size: 3rem;
-            margin-top: 0;
-            margin-bottom: 20px;
-            letter-spacing: 5px;
-            text-shadow: 0 0 10px #ff3333;
-        }
+        h1 { font-size: 3rem; margin-top: 0; margin-bottom: 20px; letter-spacing: 5px; text-shadow: 0 0 10px #ff3333; }
+        .blink { animation: blinker 1.2s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0.2; } }
 
-        .blink {
-            animation: blinker 1.2s linear infinite;
-        }
+        p { font-size: 1.2rem; line-height: 1.6; margin: 10px 0; font-weight: bold; }
 
-        @keyframes blinker {
-            50% { opacity: 0.2; }
-        }
+        .system-info { margin-top: 30px; font-size: 0.9rem; color: #cc0000; text-align: left; border-top: 1px dashed #ff3333; padding-top: 20px; }
 
-        p {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            margin: 10px 0;
-            font-weight: bold;
-        }
-
-        .system-info {
-            margin-top: 30px;
-            font-size: 0.9rem;
-            color: #cc0000;
-            text-align: left;
-            border-top: 1px dashed #ff3333;
-            padding-top: 20px;
-        }
-
-        /* Стиль для нашого страшного таймера */
-        #countdown-container {
-            margin-top: 25px;
-            padding: 15px;
-            border: 1px solid #ff3333;
-            background: rgba(255, 0, 0, 0.1);
-            font-size: 1.5rem;
-            color: #fff;
-            font-weight: bold;
-        }
-
-        #timer {
-            font-size: 2.5rem;
-            display: block;
-            margin-top: 10px;
-        }
+        #countdown-container { margin-top: 25px; padding: 15px; border: 1px solid #ff3333; background: rgba(255, 0, 0, 0.1); font-size: 1.5rem; color: #fff; font-weight: bold; }
+        #timer { font-size: 2.5rem; display: block; margin-top: 10px; }
     </style>
 </head>
 <body>
     <div class="scanline" id="scanline"></div>
     <div class="warning-container" id="main-content">
-        <h1 class="blink">⚠ СИСТЕМА БЕЗПЕКИ ⚠</h1>
-        <p>КРИТИЧНА ПОМИЛКА: НЕСАНКЦІОНОВАНИЙ ДОСТУП</p>
-        <p>Цей сервер призначений виключно для API-запитів системи LITE cook.</p>
-        <p>Ваша IP-адреса та цифрові ідентифікатори пристрою були успішно зафіксовані.</p>
+        <h1 class="blink" id="t-title"></h1>
+        <p id="t-error"></p>
+        <p id="t-desc1"></p>
+        <p id="t-desc2"></p>
 
         <div id="countdown-container" class="blink">
-            УВАГА! ІНІЦІЙОВАНО ПРОТОКОЛ ЗАХИСТУ.<br>
-            Ваш пристрій буде заблоковано через:
+            <span id="t-warning"></span>
             <span id="timer">10</span>
         </div>
 
         <div class="system-info">
-            > Фіксація з'єднання: УСПІШНО<br>
-            > Статус: <span id="status-text" class="blink">АКТИВАЦІЯ БЛОКУВАННЯ...</span>
+            <span id="t-fixation"></span><br>
+            <span id="t-status"></span>
         </div>
     </div>
 
 <script>
-        // Скрипт для зворотного відліку
+        // 1. Отримуємо мову з пам'яті браузера (куди її зберігає ваш React), або з налаштувань системи
+        let lang = localStorage.getItem('i18nextLng') || navigator.language || 'uk';
+        lang = lang.substring(0, 2).toLowerCase(); // залишаємо тільки "uk", "en", "pl"
+
+        // Якщо мова невідома, ставимо англійську за замовчуванням
+        if (!['uk', 'en', 'pl'].includes(lang)) {
+            lang = 'en';
+        }
+
+        // 2. Словники перекладів
+        const translations = {
+            uk: {
+                title: "⚠ СИСТЕМА БЕЗПЕКИ ⚠",
+                error: "КРИТИЧНА ПОМИЛКА: НЕСАНКЦІОНОВАНИЙ ДОСТУП",
+                desc1: "Цей сервер призначений виключно для API-запитів системи LITE cook.",
+                desc2: "Ваша IP-адреса та цифрові ідентифікатори пристрою були успішно зафіксовані.",
+                warning: "УВАГА! ІНІЦІЙОВАНО ПРОТОКОЛ ЗАХИСТУ.<br>Ваш пристрій буде заблоковано через:",
+                fixation: "> Фіксація з'єднання: УСПІШНО",
+                status: "> Статус: <span id='status-text' class='blink'>АКТИВАЦІЯ БЛОКУВАННЯ...</span>",
+                locked_title: "СИСТЕМУ ЗАБЛОКОВАНО",
+                locked_desc1: "З'ЄДНАННЯ ОБІРВАНО.",
+                locked_desc2: "Ідентифікатори відправлено адміністратору.",
+                unload: "СИСТЕМУ ЗАБЛОКОВАНО. ВИХІД ЗАБОРОНЕНО."
+            },
+            en: {
+                title: "⚠ SECURITY SYSTEM ⚠",
+                error: "CRITICAL ERROR: UNAUTHORIZED ACCESS",
+                desc1: "This server is intended exclusively for API requests of the LITE cook system.",
+                desc2: "Your IP address and digital device identifiers have been successfully recorded.",
+                warning: "WARNING! PROTECTION PROTOCOL INITIATED.<br>Your device will be locked in:",
+                fixation: "> Connection logging: SUCCESS",
+                status: "> Status: <span id='status-text' class='blink'>ACTIVATING LOCKDOWN...</span>",
+                locked_title: "SYSTEM LOCKED",
+                locked_desc1: "CONNECTION TERMINATED.",
+                locked_desc2: "Identifiers sent to the administrator.",
+                unload: "SYSTEM LOCKED. EXIT FORBIDDEN."
+            },
+            pl: {
+                title: "⚠ SYSTEM BEZPIECZEŃSTWA ⚠",
+                error: "BŁĄD KRYTYCZNY: NIEAUTORYZOWANY DOSTĘP",
+                desc1: "Ten serwer jest przeznaczony wyłącznie dla żądań API systemu LITE cook.",
+                desc2: "Twój adres IP i cyfrowe identyfikatory urządzenia zostały pomyślnie zapisane.",
+                warning: "UWAGA! ZAINICJOWANO PROTOKÓŁ OCHRONY.<br>Twoje urządzenie zostanie zablokowane za:",
+                fixation: "> Rejestrowanie połączenia: SUKCES",
+                status: "> Status: <span id='status-text' class='blink'>AKTYWACJA BLOKADY...</span>",
+                locked_title: "SYSTEM ZABLOKOWANY",
+                locked_desc1: "POŁĄCZENIE ZERWANE.",
+                locked_desc2: "Identyfikatory wysłane do administratora.",
+                unload: "SYSTEM ZABLOKOWANY. WYJŚCIE ZABRONIONE."
+            }
+        };
+
+        // 3. Підставляємо текст на сторінку
+        const t = translations[lang];
+        document.documentElement.lang = lang;
+        document.getElementById('t-title').innerHTML = t.title;
+        document.getElementById('t-error').innerHTML = t.error;
+        document.getElementById('t-desc1').innerHTML = t.desc1;
+        document.getElementById('t-desc2').innerHTML = t.desc2;
+        document.getElementById('t-warning').innerHTML = t.warning;
+        document.getElementById('t-fixation').innerHTML = t.fixation;
+        document.getElementById('t-status').innerHTML = t.status;
+
+        // 4. Скрипт для зворотного відліку
         let timeLeft = 10;
         const timerElement = document.getElementById('timer');
         const bodyElement = document.body;
@@ -149,29 +150,22 @@
         }, 1000);
 
         function executeLockdown() {
-            // 1. Змінюємо стиль всієї сторінки (червоний екран)
             bodyElement.classList.add('locked');
             scanline.style.display = 'none';
 
-            // Замінюємо весь контент на повідомлення про блокування
             mainContent.innerHTML = `
-                <h1 style="font-size: 5rem; text-shadow: none;">СИСТЕМУ ЗАБЛОКОВАНО</h1>
-                <p style="font-size: 2rem;">З'ЄДНАННЯ ОБІРВАНО.</p>
-                <p style="font-size: 1.5rem; margin-top: 30px;">Ідентифікатори відправлено адміністратору.</p>
+                <h1 style="font-size: 5rem; text-shadow: none;">${t.locked_title}</h1>
+                <p style="font-size: 2rem;">${t.locked_desc1}</p>
+                <p style="font-size: 1.5rem; margin-top: 30px;">${t.locked_desc2}</p>
             `;
 
-            // 2. Блокуємо спроби оновити сторінку або повернутися назад
             window.onbeforeunload = function() {
-                return "СИСТЕМУ ЗАБЛОКОВАНО. ВИХІД ЗАБОРОНЕНО.";
+                return t.unload;
             };
 
-            // 3. Робимо паузу 100 мілісекунд, щоб браузер встиг показати червоний екран,
-            // а потім НАМЕРТВО ВІШАЄМО ВЛАДКУ нескінченним циклом.
             setTimeout(() => {
                 while (true) {
-                    // Цей цикл ніколи не зупиниться.
-                    // Він "з'їсть" всі ресурси вкладки, і вона перестане реагувати.
-                    history.pushState(0, 0, location.href); // Спамимо історію браузера, щоб кнопка "Назад" зламалася
+                    history.pushState(0, 0, location.href);
                 }
             }, 100);
         }

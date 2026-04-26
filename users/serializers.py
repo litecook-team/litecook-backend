@@ -15,6 +15,10 @@ from django.template.loader import render_to_string
 from dj_rest_auth.serializers import PasswordResetConfirmSerializer
 from django.utils.http import urlsafe_base64_decode
 
+def get_lang(serializer_instance):
+    request = serializer_instance.context.get('request')
+    return getattr(request, 'LANGUAGE_CODE', 'uk')[:2] if request else 'uk'
+
 # === ФУНКЦІЯ ДЛЯ ПРОСТОГО ПЕРЕКЛАДУ ПОМИЛОК ===
 def t_msg(key, request):
     lang = getattr(request, 'LANGUAGE_CODE', 'uk')[:2] if request else 'uk'
@@ -78,16 +82,28 @@ class CustomLoginSerializer(LoginSerializer):
     # Примусово прибираємо поле username з форми входу
     username = None
 
+
 class UserIngredientSerializer(serializers.ModelSerializer):
-    ingredient_name = serializers.ReadOnlyField(source='ingredient.name')
+    # === Замість ReadOnlyField використовуємо SerializerMethodField для динамічного перекладу
+    ingredient_name = serializers.SerializerMethodField()
     ingredient_image = serializers.ImageField(source='ingredient.image', read_only=True)
-    # Зручне форматування дат (віддає рядок типу "2026-03-24 22:41")
+
     created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M", read_only=True)
     updated_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M", read_only=True)
 
     class Meta:
         model = UserIngredient
-        fields = ('id', 'ingredient', 'ingredient_name', 'ingredient_image', 'amount', 'unit', 'created_at', 'updated_at')
+        fields = ('id', 'ingredient', 'ingredient_name', 'ingredient_image', 'amount', 'unit', 'created_at',
+                  'updated_at')
+
+    # === логіка вибору правильної колонки (name_en або name_pl)
+    def get_ingredient_name(self, obj):
+        lang = get_lang(self)
+        if lang == 'en' and obj.ingredient.name_en:
+            return obj.ingredient.name_en
+        if lang == 'pl' and obj.ingredient.name_pl:
+            return obj.ingredient.name_pl
+        return obj.ingredient.name
 
 class CustomUserDetailsSerializer(UserDetailsSerializer):
     # кастомне поле для лічильника

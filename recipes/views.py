@@ -363,46 +363,34 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
         from .models.recipe import RecipeIngredient
         from users.models import UserIngredient
 
+        # === ФІКС: Отримуємо поточну мову з фронтенду ===
+        lang = getattr(request, 'LANGUAGE_CODE', 'uk')[:2] if request else 'uk'
+
+        # Додаємо вибірку name_en та name_pl з бази
         raw_required = menus.values(
             'recipe__recipe_ingredients__ingredient_id',
             'recipe__recipe_ingredients__ingredient__name',
+            'recipe__recipe_ingredients__ingredient__name_en',
+            'recipe__recipe_ingredients__ingredient__name_pl',
             'recipe__recipe_ingredients__unit',
             'recipe__recipe_ingredients__ingredient__image'
         ).annotate(
             total_required=Sum('recipe__recipe_ingredients__amount')
         )
 
-        # =========================================================
-        # РОЗУМНИЙ КОНВЕРТЕР ОДИНИЦЬ ВИМІРУ
-        # =========================================================
         def normalize_unit(amount, unit):
-            # Якщо кількість не вказана (наприклад, "за смаком")
-            if amount is None:
-                return None, unit
-
+            if amount is None: return None, unit
             amount = float(amount)
-            # 1. Вагові одиниці
             if unit == 'kg': return amount * 1000, 'g'
-
-            # 2. Об'ємні одиниці (зводимо до мілілітрів)
             if unit == 'l': return amount * 1000, 'ml'
-            if unit == 'glass': return amount * 200, 'ml'  # 1 склянка ≈ 200 мл
-            if unit == 'tbsp': return amount * 15, 'ml'  # 1 ст. л. ≈ 15 мл
-            if unit == 'tsp': return amount * 5, 'ml'  # 1 ч. л. ≈ 5 мл
-            if unit == 'drop': return amount * 0.05, 'ml'  # 1 крапля ≈ 0.05 мл
-
-            # 3. КУЛІНАРНА МАГІЯ ДЛЯ ЗЕЛЕНІ ТА ЧАСНИКУ
-            # Приблизна вага 1 пучка зелені - 40 грамів
+            if unit == 'glass': return amount * 200, 'ml'
+            if unit == 'tbsp': return amount * 15, 'ml'
+            if unit == 'tsp': return amount * 5, 'ml'
+            if unit == 'drop': return amount * 0.05, 'ml'
             if unit == 'bunch': return amount * 40, 'g'
-            # Приблизна вага 1 гілочки (sprig) зелені - 2 грами
             if unit == 'sprig': return amount * 2, 'g'
-            # Приблизна вага 1 зубчика часнику - 4 грами
             if unit == 'clove': return amount * 4, 'g'
-
-            # Інші (pcs, pack, can, taste тощо) залишаємо як є
             return amount, unit
-
-        # =========================================================
 
         merged_requirements = {}
         for req in raw_required:
@@ -410,10 +398,15 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
             if not ing_id:
                 continue
 
+            # === ФІКС: Визначаємо назву інгредієнта залежно від обраної мови ===
             ing_name = req['recipe__recipe_ingredients__ingredient__name']
+            if lang == 'en' and req['recipe__recipe_ingredients__ingredient__name_en']:
+                ing_name = req['recipe__recipe_ingredients__ingredient__name_en']
+            elif lang == 'pl' and req['recipe__recipe_ingredients__ingredient__name_pl']:
+                ing_name = req['recipe__recipe_ingredients__ingredient__name_pl']
+
             image = req['recipe__recipe_ingredients__ingredient__image']
 
-            # Нормалізуємо кількість і одиницю для РЕЦЕПТУ
             amount, unit = normalize_unit(req['total_required'], req['recipe__recipe_ingredients__unit'])
 
             key = (ing_id, ing_name, unit, image)
@@ -456,6 +449,38 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
                     have_amount = inventory_dict[(ing_id, 'ml')]
                     has_any_amount = True
                     inv_display_unit = 'ml'
+
+                # === НОВА МАГІЯ: Штуки <-> Вага (Грами) ===
+                elif unit == 'pcs' and (ing_id, 'g') in inventory_dict:
+                    avg_weight = 150  # Дефолт для фруктів/овочів (Авокадо, Банан)
+                    name_check = ing_name.lower()
+                    if 'яйц' in name_check or 'egg' in name_check or 'jajk' in name_check:
+                        avg_weight = 50
+                    elif 'лимон' in name_check or 'lemon' in name_check or 'cytryna' in name_check:
+                        avg_weight = 100
+                    elif 'часник' in name_check or 'garlic' in name_check or 'czosnek' in name_check:
+                        avg_weight = 5  # Зубчик часнику
+
+                    # Переводимо грами з холодильника в штуки
+                    have_amount = inventory_dict[(ing_id, 'g')] / avg_weight
+                    has_any_amount = True
+                    inv_display_unit = 'g'
+
+                elif unit == 'g' and (ing_id, 'pcs') in inventory_dict:
+                    avg_weight = 150
+                    name_check = ing_name.lower()
+                    if 'яйц' in name_check or 'egg' in name_check or 'jajk' in name_check:
+                        avg_weight = 50
+                    elif 'лимон' in name_check or 'lemon' in name_check or 'cytryna' in name_check:
+                        avg_weight = 100
+                    elif 'часник' in name_check or 'garlic' in name_check or 'czosnek' in name_check:
+                        avg_weight = 5
+
+                    # Переводимо штуки з холодильника в грами
+                    have_amount = inventory_dict[(ing_id, 'pcs')] * avg_weight
+                    has_any_amount = True
+                    inv_display_unit = 'pcs'
+                # ==========================================
 
                 # МАГІЯ ДЛЯ "ЗА СМАКОМ" (taste) ТА "ДРІБОК" (pinch)
                 elif unit in ['taste', 'pinch']:

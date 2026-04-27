@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import CustomUser, UserIngredient, UserActivityLog, UnverifiedUser
+from .models import CustomUser, UserIngredient, UserActivityLog, UnverifiedUser, SiteSettings
 from rest_framework_simplejwt.tokens import OutstandingToken
 
 class UserIngredientInline(admin.TabularInline):
@@ -23,10 +23,11 @@ class UserActivityLogInline(admin.TabularInline):
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ('email', 'first_name', 'is_online', 'is_email_verified','date_joined', 'is_staff', 'is_banned', 'is_superuser')
+    list_display = ('email', 'first_name', 'is_ai_allowed', 'is_online', 'is_email_verified','date_joined', 'is_staff', 'is_banned', 'is_superuser')
+    list_editable = ('is_ai_allowed',)
     ordering = ('-date_joined',)
     search_fields = ('email', 'first_name')
-    list_filter = ('is_banned', 'is_staff', 'is_superuser')
+    list_filter = ('is_ai_allowed', 'is_banned', 'is_staff', 'is_superuser')
     filter_horizontal = ('groups', 'user_permissions')
 
     # Підключаємо інвентар до сторінки юзера
@@ -65,7 +66,7 @@ class CustomUserAdmin(admin.ModelAdmin):
         return True
 
     # КНОПКИ УПРАВЛІННЯ
-    actions = ['force_logout_user', 'ban_user']
+    actions = ['force_logout_user', 'ban_user', 'enable_ai_access', 'disable_ai_access']
 
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
@@ -76,15 +77,25 @@ class CustomUserAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'description': "Для довічного бану просто поставте галочку. Для тимчасового - вкажіть дату."
         }),
-        ('Дозволи', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Дозволи', {'fields': ('is_ai_allowed', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
     )
     readonly_fields = ('date_joined', 'last_activity',)
 
     # --- ДІЇ АДМІНА ---
+    @admin.action(description="✨ Увімкнути ШІ для обраних")
+    def enable_ai_access(self, request, queryset):
+        queryset.update(is_ai_allowed=True)
+        self.message_user(request, "Доступ до ШІ успішно надано.")
+
+    @admin.action(description="🚫 Вимкнути ШІ для обраних")
+    def disable_ai_access(self, request, queryset):
+        queryset.update(is_ai_allowed=False)
+        self.message_user(request, "Доступ до ШІ успішно закрито.")
+
     @admin.action(description="⛔ Заблокувати обраних користувачів")
     def ban_user(self, request, queryset):
         queryset.update(is_banned=True, ban_reason="Блокування адміністратором")
-        self.force_logout_user(request, queryset) # Одразу викидаємо їх з сайту
+        self.force_logout_user(request, queryset)
         self.message_user(request, "Користувачів заблоковано та викинуто з сесій.")
 
     @admin.action(description="🔌 Примусово викинути з профілю (Анулювати токени)")
@@ -98,8 +109,8 @@ class CustomUserAdmin(admin.ModelAdmin):
                 UserActivityLog.objects.filter(user=user).update(is_active_session=False)
             self.message_user(request, "Сесії успішно анульовані.")
         except Exception as e:
-            self.message_user(request, "Помилка (впевніться що token_blacklist встановлено у settings.py)", level='error')
-
+            self.message_user(request, "Помилка (впевніться що token_blacklist встановлено у settings.py)",
+                              level='error')
 
 @admin.register(UnverifiedUser)
 class UnverifiedUserAdmin(admin.ModelAdmin):
@@ -114,9 +125,6 @@ class UnverifiedUserAdmin(admin.ModelAdmin):
     # Забороняємо створювати юзерів через цю "віртуальну" таблицю
     def has_add_permission(self, request):
         return False
-
-
-from .models import SiteSettings
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):

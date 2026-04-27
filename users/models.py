@@ -40,6 +40,7 @@ class CustomUser(AbstractUser):
     username = None
     email = models.EmailField(unique=True, verbose_name='Email')
     first_name = models.CharField(max_length=150, verbose_name='Ім\'я')
+    is_ai_allowed = models.BooleanField(default=False, verbose_name="Доступ до ШІ-помічника")
 
     # Прапорець для перевірки, чи підтвердив юзер пошту
     is_email_verified = models.BooleanField(default=False, verbose_name="Email підтверджено")

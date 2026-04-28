@@ -282,12 +282,42 @@ def save_password_history(sender, instance, **kwargs):
         except CustomUser.DoesNotExist:
             pass
 
+
 class SiteSettings(models.Model):
+    PROVIDER_CHOICES = [
+        ('gemini', 'Google Gemini'),
+        ('aws', 'Amazon AWS (Bedrock)'),
+    ]
+
+    GEMINI_MODELS = [
+        ('models/gemma-3-27b-it', 'Gemma 3 27B'),
+        ('models/gemma-3-12b-it', 'Gemma 3 12B'),
+        ('models/gemma-3-2b-it', 'Gemma 3 2B'),
+        ('models/gemma-3-4b-it', 'Gemma 3 4B'),
+        ('models/gemma-4-31b-it', 'Gemma 4 31B'),
+        ('models/gemma-4-26b-it', 'Gemma 4 26B'),
+        ('models/gemma-2-27b-it', 'Gemma 2 27B'),
+    ]
+
     is_ai_enabled = models.BooleanField(default=True, verbose_name="Увімкнути ШІ-асистента")
 
+    ai_provider = models.CharField(
+        max_length=20,
+        choices=PROVIDER_CHOICES,
+        default='gemini',
+        verbose_name="Провайдер ШІ"
+    )
+
+    gemini_model = models.CharField(
+        max_length=50,
+        choices=GEMINI_MODELS,
+        default='models/gemma-3-12b-it',
+        verbose_name="Модель Gemini"
+    )
+
     class Meta:
-        verbose_name = "Налаштування сайту"
-        verbose_name_plural = "Налаштування сайту"
+        verbose_name = "Налаштування ШІ-асистента"
+        verbose_name_plural = "Налаштування ШІ-асистента"
 
     def save(self, *args, **kwargs):
         self.pk = 1  # Гарантуємо, що буде лише один запис в базі

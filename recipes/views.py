@@ -598,19 +598,22 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
         return Response({"error": t_view('not_in_menu', request)}, status=404)
 
 
-# ================= АСИСТЕНТ GEMINI AI =================
+# ================= АСИСТЕНТ AI =================
 import os
 import boto3
 from botocore.exceptions import ClientError
+import google.generativeai as genai
+from django.conf import settings  # Додано для доступу до ключів AWS
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.response import Response
 from users.models import SiteSettings
 
+from .models import Recipe
 
 class AIChatThrottle(UserRateThrottle):
-    rate = '30/minute'
+    rate = '30/minute'  # Захист від спаму
 
 
 class AIChatView(APIView):
@@ -619,20 +622,16 @@ class AIChatView(APIView):
 
     def get(self, request):
         settings_obj = SiteSettings.load()
-        # ШІ активний ТІЛЬКИ якщо глобально увімкнено І юзеру дозволено
         is_user_allowed = getattr(request.user, 'is_ai_allowed', False)
         is_fully_enabled = settings_obj.is_ai_enabled and is_user_allowed
-
         return Response({"is_enabled": is_fully_enabled})
 
     def post(self, request):
         settings_obj = SiteSettings.load()
 
-        # 1. Перевірка глобального статусу
         if not settings_obj.is_ai_enabled:
             return Response({"error": "AI-асистент тимчасово вимкнений адміністратором."}, status=403)
 
-        # 2. Перевірка персонального доступу
         if not getattr(request.user, 'is_ai_allowed', False):
             return Response({"error": "Доступ до AI-асистента для вашого акаунту обмежено."}, status=403)
 
@@ -645,251 +644,168 @@ class AIChatView(APIView):
 
         page_context = self.get_page_context(current_path)
 
+        try:
+            recipes_db = Recipe.objects.all()[:50]
+            recipes_list = "\n".join([f"- [{r.title}](/recipe/{r.id})" for r in recipes_db])
+        except Exception:
+            recipes_list = "База рецептів наразі недоступна."
+
+        # === ФІКС №2: ПОВЕРНУТО БЛОК НАВІГАЦІЇ ТА ДОДАНО ОБРОБКУ НЕІСНУЮЧИХ СТОРІНОК ===
         system_instruction = f"""
 Ти — 'LITE cook AI', привітний, стильний та лаконічний персональний кулінарний асистент платформи LITE cook.
-Твоє завдання — допомагати користувачу, надихати його на готування та чітко відповідати на запитання про сайт.
 
-СТРУКТУРА САЙТУ ТА ПОСИЛАННЯ (ЗАВЖДИ ВИКОРИСТОВУЙ ЇХ, ЯКЩО РЕКОМЕНДУЄШ СТОРІНКУ):
-- [Головна сторінка](/)
-- [Підібрати рецепт](/recipes)
-- [Улюблені](/favorites)
-- [Тижневе меню](/menu)
-- [Мій профіль](/profile)
-- [Про нас](/about)
-- [Політика конфіденційності](/privacy)
+### КОНТЕКСТ ДЛЯ ТЕБЕ (НЕ ОЗВУЧУЙ КОРИСТУВАЧУ) ###
+Зараз користувач знаходиться за адресою: {current_path} ({page_context})
+Використовуй цю інформацію ТІЛЬКИ "подумки" для розуміння запитань. НІКОЛИ не пиши у відповіді "Ви знаходитесь на сторінці...".
 
-ІНФОРМАЦІЯ ПРО ПРОЄКТ:
-LITE cook — це сучасна платформа для підбору рецептів на основі інгредієнтів, що є вдома у користувача, з можливістю планування тижневого меню та генерації списку покупок у PDF.
+### ДОСТУПНА БАЗА РЕЦЕПТІВ ###
+{recipes_list}
 
-ЄДИНІ 10 ФІЛЬТРІВ НА СТОРІНЦІ "ПІДІБРАТИ РЕЦЕПТ":
-1. Інгредієнти (це теж фільтр)
-2. Групи продуктів
-3. Прийом їжі
-4. Тип страви
-5. Кухня
-6. Складність
-7. Час приготування
-8. Калорійність
-9. Дієтичні обмеження
-10. Сезонність
+### ФУНКЦІОНАЛ САЙТУ ТА ДОСТУПНІ СТОРІНКИ ###
+Існують ТІЛЬКИ ці сторінки:
+- Головна (/)
+- Підібрати рецепт (/recipes)
+- Улюблені (/favorites)
+- Тижневе меню (/menu)
+- Мій профіль (/profile)
+- Про нас (/about)
+- Політика конфіденційності (/privacy)
 
-КОНТЕКСТ КОРИСТУВАЧА:
-Зараз користувач знаходиться за адресою: {current_path}.
-Деталі: {page_context}.
+### КОМАНДИ НАВІГАЦІЇ (СУВОРО!) ###
+Якщо користувач ПРЯМО просить тебе відкрити, перейти або переключити на якусь з ІСНУЮЧИХ сторінок (перелічених вище), ти ЗОБОВ'ЯЗАНИЙ додати на самий початок відповіді технічний тег [NAVIGATE:/шлях].
+Приклад: [NAVIGATE:/favorites] Із задоволенням! Відкриваю ваші збережені рецепти.
 
-ПРАВИЛА ПОВЕДІНКИ (СУВОРО!):
-1. Відповідай коротко, лаконічно, без "води" (максимум 1-3 невеликі абзаци).
-2. Якщо перераховуєш фільтри або функції — роби один звичайний маркований список. НІКОЛИ не роби вкладених багаторівневих списків.
-3. Згадуючи сторінку сайту, ОБОВ'ЯЗКОВО роби її клікабельною (використовуй Markdown: [Назва сторінки](/url)).
-4. Відповідай ТІЛЬКИ на теми кулінарії та функціоналу LITE cook. На інші теми тактовно відмовляй.
+Якщо користувач просить перейти на сторінку, якої НЕ ІСНУЄ в списку вище (наприклад "кошик", "магазин", "чат з кухарем"), НЕ використовуй тег навігації, а тактично відповідай:
+"На жаль, такої сторінки на нашій платформі немає. Але я можу допомогти вам з підбором рецептів або плануванням меню!"
+
+### ПРАВИЛА ПОВЕДІНКИ ###
+1. МОВА: Відповідай тією ж мовою, якою пише користувач.
+2. ПОШУК РЕЦЕПТІВ: Пропонуй ТІЛЬКИ рецепти з блоку "ДОСТУПНА БАЗА РЕЦЕПТІВ". Посилання давай у форматі [Назва](/recipe/ID).
+3. ВІДСУТНІ РЕЦЕПТИ: Якщо за критеріями рецептів немає, не вигадуй їх. Пиши: "На жаль, за такими критеріями рецепти відсутні, однак ваші пропозиції будуть враховані!"
+4. ЛАКОНІЧНІСТЬ: Відповідай коротко (1-2 абзаци).
+5. ФОРМАТУВАННЯ: Роби прості марковані списки. Назви кнопок та галочок виділяй жирним шрифтом.
+6. ТЕМА: Тільки кулінарія та LITE cook.
+7. НЕ ОЗВУЧУЙ МІСЦЕЗНАХОДЖЕННЯ: Категорично заборонено писати, на якій сторінці зараз користувач.
 """
 
-        # 1. Форматуємо історію під стандарти AWS Converse API
-        formatted_messages = []
-        for msg in chat_history:
-            # AWS очікує ролі 'user' або 'assistant' (у Google було 'model')
-            role = "user" if msg['role'] == 'user' else "assistant"
-            formatted_messages.append({
-                "role": role,
-                "content": [{"text": msg['text']}]
-            })
+        # ==========================================================
+        # 🟢 ГОЛОВНИЙ ПЕРЕМИКАЧ ПРОВАЙДЕРІВ ШІ
+        # Вкажіть 'gemini' або 'aws'
+        # ==========================================================
+        AI_PROVIDER = settings_obj.ai_provider
 
-        # Додаємо поточне питання
-        formatted_messages.append({
-            "role": "user",
-            "content": [{"text": user_message}]
-        })
+        # ==========================================================
+        # ЛОГІКА GOOGLE GEMINI
+        # ==========================================================
+        if AI_PROVIDER == 'gemini':
+            try:
+                if not getattr(settings, 'GEMINI_API_KEY', None) and not os.environ.get("GEMINI_API_KEY"):
+                    return Response({"error": "Ключ ШІ не налаштовано."}, status=500)
 
-        try:
-            # 2. Ініціалізуємо підключення до AWS Bedrock
-            bedrock_client = boto3.client(
-                service_name='bedrock-runtime',
-                region_name=settings.AWS_S3_REGION_NAME,
-                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
-            )
+                genai.configure(api_key=getattr(settings, 'GEMINI_API_KEY', os.environ.get("GEMINI_API_KEY")))
 
-            # 3. Викликаємо модель (Claude 3 Haiku - дуже швидка і розумна модель від Anthropic)
-            response = bedrock_client.converse(
-                modelId="anthropic.claude-3-haiku-20240307-v1:0",
-                messages=formatted_messages,
-                system=[{"text": system_instruction}]
-            )
+                # ТЕПЕР БЕРЕМО МОДЕЛЬ З БАЗИ ДАНИХ!
+                target_model = settings_obj.gemini_model
 
-            # 4. Витягуємо текст відповіді
-            reply_text = response['output']['message']['content'][0]['text']
+                model = genai.GenerativeModel(model_name=target_model)
 
-            return Response({"reply": reply_text})
+                # # === ПРОСТО ВСТАВТЕ ОДИН ІЗ РЯДКІВ НИЖЧЕ ===
+                # # target_model = "models/gemma-3-27b-it"
+                # # target_model = "models/gemma-3-2b-it"
+                # target_model = "models/gemma-3-12b-it"
+                # # target_model = "models/gemma-4-26b-it"
+                # # target_model = "models/gemma-4-31b-it"
+                # # target_model = "models/gemma-2-27b-it"
+                #
+                # model = genai.GenerativeModel(model_name=target_model)
 
-        except ClientError as e:
-            error_code = e.response['Error']['Code']
-            error_msg = e.response['Error']['Message']
-            print(f"Bedrock Error [{error_code}]: {error_msg}")
+                formatted_history = [
+                    {"role": "user",
+                     "parts": [f"Ось твої суворі правила поведінки як LITE cook AI:\n{system_instruction}"]},
+                    {"role": "model", "parts": [
+                        "Зрозуміло! Я буду суворо дотримуватися цих правил, перемикатиму сторінки за допомогою тегу NAVIGATE і ввічливо відмовлятиму, якщо сторінка не існує."]}
+                ]
 
-            if error_code == 'ThrottlingException':
-                return Response({"error": t_view('ai_quota', request)}, status=429)
+                for msg in chat_history:
+                    role = "user" if msg['role'] == 'user' else "model"
+                    formatted_history.append({"role": role, "parts": [msg['text']]})
 
-            return Response({"error": f"Помилка AWS: {error_msg}"}, status=500)
-        except Exception as e:
-            print("General Error:", str(e))
-            return Response({"error": str(e)}, status=500)
+                chat = model.start_chat(history=formatted_history)
+                response = chat.send_message(user_message)
+
+                return Response({"reply": response.text})
+
+            except Exception as e:
+                error_msg = str(e)
+                print("Gemini/Gemma Error:", error_msg)
+                if "429" in error_msg or "quota" in error_msg.lower():
+                    return Response({"error": t_view('ai_quota', request)}, status=429)
+                return Response({"error": error_msg}, status=500)
+
+
+        # ==========================================================
+        # ЛОГІКА AMAZON BEDROCK (AWS)
+        # ==========================================================
+        elif AI_PROVIDER == 'aws':
+            try:
+                formatted_messages = []
+                for msg in chat_history:
+                    # AWS очікує ролі 'user' або 'assistant'
+                    role = "user" if msg['role'] == 'user' else "assistant"
+                    formatted_messages.append({
+                        "role": role,
+                        "content": [{"text": msg['text']}]
+                    })
+
+                # Додаємо поточне питання
+                formatted_messages.append({
+                    "role": "user",
+                    "content": [{"text": user_message}]
+                })
+
+                bedrock_client = boto3.client(
+                    service_name='bedrock-runtime',
+                    region_name=settings.AWS_S3_REGION_NAME,
+                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+                )
+
+                # Доступні моделі: "amazon.nova-lite-v1:0", "ai21.jamba-1-5-mini-v1:0" або Claude
+                response = bedrock_client.converse(
+                    modelId="ai21.jamba-1-5-mini-v1:0",
+                    messages=formatted_messages,
+                    system=[{"text": system_instruction}]
+                )
+
+                reply_text = response['output']['message']['content'][0]['text']
+                return Response({"reply": reply_text})
+
+            except ClientError as e:
+                error_code = e.response['Error']['Code']
+                error_msg = e.response['Error']['Message']
+                print(f"Bedrock Error [{error_code}]: {error_msg}")
+
+                if error_code == 'ThrottlingException':
+                    return Response({"error": "Перевищено ліміт запитів AWS."}, status=429)
+                return Response({"error": f"Помилка AWS: {error_msg}"}, status=500)
+            except Exception as e:
+                print("General Error:", str(e))
+                return Response({"error": str(e)}, status=500)
+
 
     def get_page_context(self, path):
-        if 'profile' in path:
-            return "Тут користувач може керувати аватаром, іменем, паролем, алергіями, улюбленими кухнями та дієтами. А також вести віртуальний холодильник ('Мої продукти') і читати кулінарні поради."
+        if path == '/' or path == '' or 'home' in path.lower():
+            return "Головна сторінка. Тут розписані переваги проєкту (сезонні продукти, швидке планування раціону) та відображається 'Рецепт дня'."
+        elif 'profile' in path:
+            return "Мій профіль. Тут можна налаштувати віртуальний холодильник, алергії, дієти та улюблені кухні, а також подивитися статистику."
         elif 'menu' in path:
-            return "Тут користувач планує страви на тиждень і генерує PDF список покупок (враховуючи свій віртуальний холодильник)."
+            return "Тижневе меню. Тут можна розпланувати страви на тиждень, згенерувати PDF список покупок та активувати віднімання наявних продуктів."
         elif 'recipes' in path:
-            return "Це сторінка пошуку. Тут користувач підбирає рецепти, використовуючи 10 доступних фільтрів (включаючи пошук за конкретними інгредієнтами)."
+            return "Підібрати рецепт. Тут доступні 10 різних фільтрів для пошуку ідеальної страви."
         elif 'favorites' in path:
-            return "Тут зберігаються улюблені рецепти користувача."
+            return "Улюблені. Тут збережені всі вподобані рецепти."
         elif 'about' in path:
-            return "Це сторінка 'Про нас'."
+            return "Про нас. Інформація про команду та створення проєкту."
         elif 'privacy' in path:
-            return "Це сторінка 'Політика конфіденційності'."
-        return "Це загальна сторінка сайту."
-
-
-# ************************** GEMINI ***************************
-# import os
-# import google.generativeai as genai
-# from rest_framework.views import APIView
-# from rest_framework.permissions import IsAuthenticated
-# from rest_framework.throttling import UserRateThrottle
-# from users.models import SiteSettings
-#
-#
-# class AIChatThrottle(UserRateThrottle):
-#     rate = '30/minute'  # Захист від спаму: не більше 30 повідомлень на хвилину від юзера
-#
-#
-# class AIChatView(APIView):
-#     permission_classes = [IsAuthenticated]
-#     throttle_classes = [AIChatThrottle]
-#
-#     # GET-метод, щоб фронтенд міг дізнатися чи увімкнений ШІ
-#     def get(self, request):
-#         settings_obj = SiteSettings.load()
-#         return Response({"is_enabled": settings_obj.is_ai_enabled})
-#
-#     def post(self, request):
-#         # Перевіряємо чи адмін не вимкнув чат
-#         settings_obj = SiteSettings.load()
-#         if not settings_obj.is_ai_enabled:
-#             return Response({"error": "AI-асистент тимчасово вимкнений адміністратором."}, status=403)
-#
-#         user_message = request.data.get('message')
-#         current_path = request.data.get('current_path', '/')
-#         chat_history = request.data.get('history', [])
-#
-#         if not user_message:
-#             return Response({"error": "Повідомлення порожнє"}, status=400)
-#
-#         page_context = self.get_page_context(current_path)
-#
-#         # === ВДОСКОНАЛЕНА ІНСТРУКЦІЯ ДЛЯ ШІ ===
-#         system_instruction = f"""
-# Ти — 'LITE cook AI', привітний, стильний та лаконічний персональний кулінарний асистент платформи LITE cook.
-# Твоє завдання — допомагати користувачу, надихати його на готування та чітко відповідати на запитання про сайт.
-#
-# СТРУКТУРА САЙТУ ТА ПОСИЛАННЯ (ЗАВЖДИ ВИКОРИСТОВУЙ ЇХ, ЯКЩО РЕКОМЕНДУЄШ СТОРІНКУ):
-# - [Головна сторінка](/)
-# - [Підібрати рецепт](/recipes)
-# - [Улюблені](/favorites)
-# - [Тижневе меню](/menu)
-# - [Мій профіль](/profile)
-# - [Про нас](/about)
-# - [Політика конфіденційності](/privacy) (має підсторінки: Збір даних, Використання, Куки, Контроль, Переглянути повністю)
-#
-# ІНФОРМАЦІЯ ПРО ПРОЄКТ:
-# LITE cook — це сучасна платформа для підбору рецептів на основі інгредієнтів, що є вдома у користувача, з можливістю планування тижневого меню та генерації списку покупок у PDF.
-#
-# ЄДИНІ 10 ФІЛЬТРІВ НА СТОРІНЦІ "ПІДІБРАТИ РЕЦЕПТ":
-# 1. Інгредієнти (це теж фільтр)
-# 2. Групи продуктів
-# 3. Прийом їжі
-# 4. Тип страви
-# 5. Кухня
-# 6. Складність
-# 7. Час приготування
-# 8. Калорійність
-# 9. Дієтичні обмеження
-# 10. Сезонність
-#
-# КОНТЕКСТ КОРИСТУВАЧА:
-# Зараз користувач знаходиться за адресою: {current_path}.
-# Деталі: {page_context}.
-#
-# ПРАВИЛА ПОВЕДІНКИ (СУВОРО!):
-# 1. Відповідай коротко, лаконічно, без "води" (максимум 1-3 невеликі абзаци).
-# 2. Якщо перераховуєш фільтри або функції — роби один звичайний маркований список. НІКОЛИ не роби вкладених багаторівневих списків.
-# 3. Згадуючи сторінку сайту, ОБОВ'ЯЗКОВО роби її клікабельною (використовуй Markdown: [Назва сторінки](/url)).
-# 4. Відповідай ТІЛЬКИ на теми кулінарії та функціоналу LITE cook. На інші теми тактовно відмовляй: "Вибачте, я фахівець виключно з кулінарії та платформи LITE cook ✨".
-# """
-#
-#         try:
-#             if not getattr(settings, 'GEMINI_API_KEY', None) and not os.environ.get("GEMINI_API_KEY"):
-#                 print("ПОМИЛКА: Ключ GEMINI_API_KEY не знайдено!")
-#                 return Response({"error": "Ключ ШІ не налаштовано."}, status=500)
-#
-#             genai.configure(api_key=getattr(settings, 'GEMINI_API_KEY', os.environ.get("GEMINI_API_KEY")))
-#
-#             # === ОБХІД ЖОРСТКИХ ЛІМІТІВ ===
-#             target_model = "gemini-2.0-flash"
-#             for m in genai.list_models():
-#                 if 'generateContent' in m.supported_generation_methods and 'flash' in m.name.lower():
-#                     # Відкидаємо версію 2.5, оскільки для неї діє ліміт всього 20 запитів на день
-#                     if '2.5' not in m.name:
-#                         target_model = m.name
-#                         break
-#
-#             model = genai.GenerativeModel(
-#                 model_name=target_model,
-#                 system_instruction=system_instruction
-#             )
-#             # ========================
-#
-#             formatted_history = []
-#             for msg in chat_history:
-#                 role = "user" if msg['role'] == 'user' else "model"
-#                 formatted_history.append({"role": role, "parts": [msg['text']]})
-#
-#             chat = model.start_chat(history=formatted_history)
-#             response = chat.send_message(user_message)
-#
-#             return Response({"reply": response.text})
-#
-#         except Exception as e:
-#             error_msg = str(e)
-#             print("Gemini Error:", error_msg)
-#             return Response({"error": error_msg}, status=500)
-#
-#     def get_page_context(self, path):
-#         # ФІКС: Виправили опис сторінки рецептів
-#         if 'profile' in path:
-#             return "Тут користувач може керувати аватаром, іменем, паролем, алергіями, улюбленими кухнями та дієтами. А також вести віртуальний холодильник ('Мої продукти') і читати кулінарні поради."
-#         elif 'menu' in path:
-#             return "Тут користувач планує страви на тиждень і генерує PDF список покупок (враховуючи свій віртуальний холодильник)."
-#         elif 'recipes' in path:
-#             return "Це сторінка пошуку. Тут користувач підбирає рецепти, використовуючи 10 доступних фільтрів (включаючи пошук за конкретними інгредієнтами)."
-#         elif 'favorites' in path:
-#             return "Тут зберігаються улюблені рецепти користувача."
-#         elif 'about' in path:
-#             return "Це сторінка 'Про нас'."
-#         elif 'privacy' in path:
-#             return "Це сторінка 'Політика конфіденційності'."
-#         return "Це загальна сторінка сайту."
-# ********************************************************************************
-
-
-    # def get_page_context(self, path):
-    #     # Маппінг шляхів до описів
-    #     if 'profile' in path:
-    #         return "Користувач у своєму профілі. Він може додавати, змінювати, видаляти аватарку (своє фотозображення), редагувати ім'я, міняти пароль, додавати алергії (інгредієнти на які у користувача алергії), дієти (харчові обмеження яких дотримується користувач, наприклад користувач вегетаріанець) або наповнювати свій віртуальний холодильник (Мої продукти, додавати продукти які є у користувача вдома). Також може ознайомитися із порадами (всього 3 поради) від LITE cook, а також бачити статистику по своїх улюблених рецептах, кухнях, алергіях, харчових обмеженнях, його продуктах (кількість)."
-    #     elif 'menu' in path:
-    #         return "Користувач на сторінці Тижневого меню. Він може розпланувати рецепти по днях тижня та прийомах їжі, а також згенерувати список покупок на конкретний день або цілий тиждень (з урахуванням або без урахування його продуктів в холодильнику)."
-    #     elif 'recipes' in path:
-    #         return "Користувач на сторінці пошуку рецептів. Тут він може шукати рецепти за наявними інгредієнтами або використовувати фільтри (кухня, складність, сезонність, групи продуктів, прийом їжі, тип страви, час приготування, калорійність, дієтичні обмеження)."
-    #     elif 'favorites' in path:
-    #         return "Користувач переглядає свої збережені (улюблені) рецепти."
-    #     return "Користувач на головній або загальній сторінці сайту. Він бачить рецепт дня від LITE cook, а також три переваги чому варто користуватися саме сайтом LITE cook."
+            return "Політика конфіденційності."
+        return "Загальна сторінка платформи LITE cook."

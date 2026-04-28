@@ -1630,6 +1630,525 @@ RECIPES_DATA = [
              "en": "Pour the prepared glaze sauce over the fish and vegetables. Cover with foil and bake another 15 minutes. Optionally, remove the foil at the end so the crust browns.",
              "pl": "Zalej rybę i warzywa przygotowanym sosem z glazurą. Przykryj folią aluminiową i piecz kolejne 15 minut. Opcjonalnie na koniec zdejmij folię, aby skórka się zarumieniła."}
         ]
+    },
+    {
+        "title": "Курячий боул з кіноа та лохиною",
+        "title_en": "Chicken and quinoa bowl with blueberries",
+        "title_pl": "Miska з kurczakiem, komosą ryżową i borówkami",
+        "description": "Поживний боул із куркою, кіноа, лохиною, зеленим горошком і фетою. Поєднує білок, крупу та свіжий ягідний смак.",
+        "description_en": "A nutritious bowl with chicken, quinoa, blueberries, green peas, and feta. Combines protein, grains, and a fresh berry taste.",
+        "description_pl": "Pożywna miska z kurczakiem, komosą ryżową, borówkami, zielonym groszkiem i fetą. Łączy białko, kaszę i świeży jagodowy smak.",
+        "source": "Джеймі Олівер",
+        "source_en": "Jamie Oliver",
+        "source_pl": "Jamiego Olivera",
+        "cooking_time": 25,
+        "portions": 2,
+        "calories": 595,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.BRITISH, Cuisine.AUTHOR],
+        "meal_times": [MealTime.LUNCH, MealTime.DINNER],
+        "dietary_tags": [Diet.TRADITIONAL, Diet.HIGH_PROTEIN, Diet.DIETARY],
+        "dish_types": [DishType.SALAD, DishType.MEAT, DishType.MAIN],
+        "ingredients": [
+            ("Куряче філе", 300, UnitChoice.G),
+            ("Кіноа", 250, UnitChoice.G),
+            ("Горошок зелений", 150, UnitChoice.G),
+            ("Лохина", 160, UnitChoice.G),
+            ("Фета", 30, UnitChoice.G),
+            ("Часник", 10, UnitChoice.G),
+            ("Лимон", 1, UnitChoice.PCS),
+            ("М'ята", 15, UnitChoice.G),
+            ("Оливкова олія", 15, UnitChoice.ML),
+            ("Сіль", 2, UnitChoice.G),
+            ("Перець чорний", 1, UnitChoice.G),
+        ],
+        "steps": [
+            {
+             "uk": "Попередньо відваріть кіноа. Піддайте куряче філе швидкому обсмажуванню на оливковій олії до золотистого кольору (близько 5 хвилин), попередньо приправивши сіллю та перцем.",
+             "en": "Pre-boil the quinoa. Quickly fry the chicken fillet in olive oil until golden brown (about 5 minutes), seasoning with salt and pepper beforehand.",
+             "pl": "Wcześniej ugotuj komosę ryżową. Szybko podsmaż filet z kurczaka na oliwie z oliwek na złoty kolor (około 5 minut), wcześniej doprawiając solą i pieprzem."
+            },
+            {
+             "uk": "Додайте нарізаний часник та цедру лимона до курки для ароматизації олії.",
+             "en": "Add chopped garlic and lemon zest to the chicken to flavor the oil.",
+             "pl": "Dodaj posiekany czosnek i skórkę z cytryny do kurczaka, aby nadać oliwie aromat."
+            },
+            {
+             "uk": "Додайте лохину у сковороду. Готуйте, поки ягоди не почнуть лопатися і виділяти сік, формуючи натуральний соус. Зніміть м'ясо з вогню та наріжте.",
+             "en": "Add the blueberries to the pan. Cook until the berries start to burst and release their juice, forming a natural sauce. Remove the meat from the heat and slice.",
+             "pl": "Dodaj borówki na patelnię. Gotuj, aż jagody zaczną pękać i puszczać sok, tworząc naturalny sos. Zdejmij mięso z ognia i pokrój."
+            },
+            {
+             "uk": "У ту ж сковороду додайте відварену кіноа та зелений горошок. Прогрійте до випаровування зайвої вологи. Додайте лимонний сік.",
+             "en": "In the same pan, add the cooked quinoa and green peas. Heat until excess moisture evaporates. Add lemon juice.",
+             "pl": "Na tę samą patelnię dodaj ugotowaną komosę ryżową i zielony groszek. Podgrzewaj, aż nadmiar wilgoci wyparuje. Dodaj sok z cytryny."
+            },
+            {
+             "uk": "Викладіть теплу базу у тарілку, зверху розмістіть курку, посипте м'ятою та розкришеною Фетою.",
+             "en": "Place the warm base on a plate, top with chicken, sprinkle with mint and crumbled feta.",
+             "pl": "Wyłóż ciepłą bazę na talerz, na wierzchu połóż kurczaka, posyp miętą i pokruszoną fetą."
+            }
+        ]
+    },
+    {
+        "title": "Ароматний плов з білим рисом та мідіями",
+        "title_en": "Fragrant pilaf with white rice and mussels",
+        "title_pl": "Aromatyczny pilaw z białym ryżem i małżami",
+        "description": "Плов із білим рисом, мідіями, морквою, цибулею та паприкою. Ситна страва з морепродуктами для обіду або вечері.",
+        "description_en": "Pilaf with white rice, mussels, carrots, onions, and paprika. A hearty seafood dish for lunch or dinner.",
+        "description_pl": "Pilaw z białym ryżem, małżami, marchewką, cebulą i papryką. Sycące danie z owocami morza na obiad lub kolację.",
+        "source": "Євген Клопотенко",
+        "source_en": "Yevhen Klopotenko",
+        "source_pl": "Jewhen Klopotenko",
+        "cooking_time": 90,
+        "portions": 6,
+        "calories": 390,
+        "difficulty": Difficulty.MEDIUM,
+        "cuisine": [Cuisine.AUTHOR, Cuisine.INTERNATIONAL],
+        "meal_times": [MealTime.LUNCH, MealTime.DINNER],
+        "dietary_tags": [Diet.TRADITIONAL, Diet.SEAFOOD_DIET],
+        "dish_types": [DishType.MAIN, DishType.SEAFOOD],
+        "ingredients": [
+            ("Рис білий", 400, UnitChoice.G),
+            ("Мідії", 500, UnitChoice.G),
+            ("Морква", 150, UnitChoice.G),
+            ("Цибуля ріпчаста", 100, UnitChoice.G),
+            ("Часник", 40, UnitChoice.G),
+            ("Рослинна олія", 50, UnitChoice.ML),
+            ("Паприка", 5, UnitChoice.G),
+            ("Сіль", 5, UnitChoice.G),
+            ("Вода", 500, UnitChoice.ML),
+        ],
+        "steps": [
+            {
+             "uk": "Промийте рис у холодній воді 3-5 разів (до прозорої води) та замочіть на 10 хвилин.",
+             "en": "Wash the rice in cold water 3-5 times (until the water is clear) and soak for 10 minutes.",
+             "pl": "Opłucz ryż w zimnej wodzie 3-5 razy (aż woda będzie czysta) i namocz na 10 minut."
+            },
+            {
+             "uk": "У казані розігрійте олію. Обсмажте нарізану кубиками цибулю та соломкою моркву (близько 10 хвилин).",
+             "en": "Heat the oil in a cauldron. Fry diced onions and julienned carrots (about 10 minutes).",
+             "pl": "Rozgrzej olej w kociołku. Podsmaż pokrojoną w kostkę cebulę i marchewkę w paski (około 10 minut)."
+            },
+            {
+             "uk": "Додайте очищені мідії і смажте не більше 2 хвилин, щоб білок не стал жорстким.",
+             "en": "Add peeled mussels and fry for no more than 2 minutes so the protein does not become tough.",
+             "pl": "Dodaj oczyszczone małże i smaż nie dłużej niż 2 minuty, aby białko nie stwardniało."
+            },
+            {
+             "uk": "Всипте солодку паприку та рис, ретельно перемішайте для обволікання зерен ліпідами.",
+             "en": "Pour in sweet paprika and rice, mix thoroughly to coat the grains with lipids.",
+             "pl": "Wsyp słodką paprykę i ryż, dokładnie wymieszaj, aby ziarna pokryły się lipidami."
+            },
+            {
+             "uk": "Залийте гарячою водою, в центр занурте цілу нечищену головку часнику. Посоліть, накрийте кришкою і варіть на мінімальному вогні 30 хвилин. Дайте настоятися ще 15 хвилин без вогню.",
+             "en": "Pour hot water, submerge a whole unpeeled head of garlic in the center. Add salt, cover, and cook on minimum heat for 30 minutes. Let it brew for another 15 minutes off the heat.",
+             "pl": "Zalej gorącą wodą, zanurz w środku całą, nieobraną główkę czosnku. Posól, przykryj i gotuj na minimalnym ogniu przez 30 minut. Pozostaw do naciągnięcia na kolejne 15 minut bez ognia."
+            }
+        ]
+    },
+    {
+        "title": "Омлет зі шпинатом та фетою",
+        "title_en": "Spinach and feta omelet",
+        "title_pl": "Omlet ze szpinakiem i fetą",
+        "description": "Ніжний омлет зі шпинатом, фетою та зеленою цибулею. Добрий варіант для швидкого сніданку або легкого перекусу.",
+        "description_en": "A delicate omelet with spinach, feta, and green onions. A great option for a quick breakfast or a light snack.",
+        "description_pl": "Delikatny omlet ze szpinakiem, fetą i zieloną cebulką. Dobra opcja na szybkie śniadanie lub lekką przekąskę.",
+        "source": "Katie Workman",
+        "source_en": "Katie Workman",
+        "source_pl": "Katie Workman",
+        "cooking_time": 15,
+        "portions": 1,
+        "calories": 320,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.INTERNATIONAL],
+        "meal_times": [MealTime.BREAKFAST, MealTime.SNACK],
+        "dietary_tags": [Diet.TRADITIONAL, Diet.VEGETARIAN, Diet.GLUTEN_FREE],
+        "dish_types": [DishType.OMELET],
+        "ingredients": [
+            ("Яйця", 3, UnitChoice.PCS),
+            ("Шпинат", 50, UnitChoice.G),
+            ("Фета", 30, UnitChoice.G),
+            ("Вершкове масло", 10, UnitChoice.G),
+            ("Цибуля зелена", 5, UnitChoice.G),
+            ("Сіль", 1, UnitChoice.G),
+            ("Перець чорний", 1, UnitChoice.G),
+        ],
+        "steps": [
+            {
+             "uk": "На гарячій сковороді з краплею масла швидко спасеруйте шпинат до м'якості (близько 1 хвилини). Перекладіть його на тарілку, щоб зупинити приготування, і злийте зайву рідину.",
+             "en": "On a hot pan with a drop of butter, quickly sauté the spinach until soft (about 1 minute). Transfer it to a plate to stop the cooking, and drain excess liquid.",
+             "pl": "Na gorącej patelni z odrobiną masła szybko podsmaż szpinak do miękkości (około 1 minuty). Przełóż na talerz, aby zatrzymać gotowanie, i odcedź nadmiar płynu."
+            },
+            {
+             "uk": "Збийте яйця у мисці з сіллю та чорним перцем до однорідності.",
+             "en": "Beat the eggs in a bowl with salt and black pepper until smooth.",
+             "pl": "Ubij jajka w misce z solą i czarnym pieprzem na gładką masę."
+            },
+            {
+             "uk": "Розтопіть вершкове масло на сковороді на середньому вогні. Вилийте яєчну масу. Коли краї почнуть хапатися, злегка підіймайте їх лопаткою, щоб рідка маса стікала вниз.",
+             "en": "Melt butter in a pan over medium heat. Pour in the egg mixture. When the edges start to set, lift them slightly with a spatula so the liquid mass flows underneath.",
+             "pl": "Roztop masło na patelni na średnim ogniu. Wlej masę jajeczną. Gdy brzegi zaczną się ścinać, lekko unoś je szpatułką, aby płynna masa spłynęła na dół."
+            },
+            {
+             "uk": "Коли омлет буде майже готовий, але ще злегка вологий зверху, викладіть на одну половину підготовлений шпинат та покришіть сир Фета.",
+             "en": "When the omelet is almost done but still slightly moist on top, place the prepared spinach on one half and crumble the Feta cheese.",
+             "pl": "Gdy omlet będzie prawie gotowy, ale wciąż lekko wilgotny na wierzchu, wyłóż przygotowany szpinak na jedną połowę i pokrusz ser Feta."
+            },
+            {
+             "uk": "Обережно складіть омлет навпіл за допомогою лопатки, потримайте на вогні ще 30 секунд для розплавлення сиру. Подавайте, посипавши зеленою цибулею.",
+             "en": "Carefully fold the omelet in half using a spatula, keep on the heat for another 30 seconds to melt the cheese. Serve sprinkled with green onions.",
+             "pl": "Ostrożnie złóż omlet na pół za pomocą szpatułki, potrzymaj na ogniu przez kolejne 30 sekund, aby ser się roztopił. Podawaj posypany zieloną cebulką."
+            }
+        ]
+    },
+    {
+        "title": "Запечена курка з картоплею та лимоном",
+        "title_en": "Baked chicken with potatoes and lemon",
+        "title_pl": "Pieczony kurczak z ziemniakami i cytryną",
+        "description": "Курячі стегна запікаються разом із картоплею, лимоном, часником і розмарином. Це проста ситна страва для сімейного обіду або вечері.",
+        "description_en": "Chicken thighs baked with potatoes, lemon, garlic, and rosemary. This is a simple hearty dish for a family lunch or dinner.",
+        "description_pl": "Udka z kurczaka pieczone z ziemniakami, cytryną, czosnkiem i rozmarynem. To proste, sycące danie na rodzinny obiad lub kolację.",
+        "source": "Good Food team",
+        "source_en": "Good Food team",
+        "source_pl": "Good Food team",
+        "cooking_time": 75,
+        "portions": 4,
+        "calories": 520,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.BRITISH, Cuisine.INTERNATIONAL],
+        "meal_times": [MealTime.LUNCH, MealTime.DINNER],
+        "dietary_tags": [Diet.TRADITIONAL, Diet.GLUTEN_FREE],
+        "dish_types": [DishType.MAIN, DishType.MEAT, DishType.GARNISH],
+        "ingredients": [
+            ("Курячі стегна", 800, UnitChoice.G),
+            ("Картопля", 500, UnitChoice.G),
+            ("Лимон", 1, UnitChoice.PCS),
+            ("Розмарин", 5, UnitChoice.G),
+            ("Часник", 40, UnitChoice.G),
+            ("Цибуля ріпчаста", 100, UnitChoice.G),
+            ("Оливкова олія", 30, UnitChoice.ML),
+            ("Сіль", 4, UnitChoice.G),
+            ("Перець чорний", 2, UnitChoice.G),
+        ],
+        "steps": [
+            {
+             "uk": "Розігрійте духовку до 190°C.",
+             "en": "Preheat the oven to 190°C.",
+             "pl": "Rozgrzej piekarnik do 190°C."
+            },
+            {
+             "uk": "Змішайте в мисці кілька подрібнених зубчиків часнику, оливкову олію та сіль/перець. Натріть цією сумішшю курячі стегна і викладіть їх у велику форму для запікання.",
+             "en": "Mix a few minced cloves of garlic, olive oil, and salt/pepper in a bowl. Rub the chicken thighs with this mixture and place them in a large baking dish.",
+             "pl": "W misce wymieszaj kilka posiekanych ząbków czosnku, oliwę z oliwek i sól/pieprz. Natrzyj tą mieszanką udka z kurczaka i umieść je w dużym naczyniu do pieczenia."
+            },
+            {
+             "uk": "Наріжте картоплю на половинки або чверті, цибулю — товстими скибками. Лимон розріжте на 4 частини.",
+             "en": "Cut the potatoes into halves or quarters, and the onion into thick slices. Cut the lemon into 4 pieces.",
+             "pl": "Ziemniaki przekrój na połówki lub ćwiartki, a cebulę w grube plastry. Cytrynę pokrój na 4 części."
+            },
+            {
+             "uk": "Розкладіть картоплю, лимон, цибулю, цілі (неочищені) зубчики часнику та гілочки розмарину навколо курки.",
+             "en": "Arrange the potatoes, lemon, onion, whole (unpeeled) garlic cloves, and rosemary sprigs around the chicken.",
+             "pl": "Ułóż ziemniaki, cytrynę, cebulę, całe (nieobrane) ząbki czosnku i gałązki rozmarynu wokół kurczaka."
+            },
+            {
+             "uk": "Запікайте 45-55 хвилин, періодично перевертаючи овочі в соках, що виділилися, доки курка не стане золотистою, а картопля м'якою всередині та хрусткою зовні.",
+             "en": "Bake for 45-55 minutes, occasionally turning the vegetables in the released juices, until the chicken is golden and the potatoes are soft inside and crispy outside.",
+             "pl": "Piecz 45-55 minut, od czasu do czasu obracając warzywa w wydzielonych sokach, aż kurczak będzie złocisty, a ziemniaki miękkie w środku i chrupiące na zewnątrz."
+            }
+        ]
+    },
+    {
+        "title": "Запечене філе лосося на овочевій подушці",
+        "title_en": "Baked salmon fillet on a bed of vegetables",
+        "title_pl": "Pieczony filet z łososia na łóżku warzywnym",
+        "description": "Філе лосося запікається з кабачком, бататом, чері, печерицями та червоною цибулею. Страва виходить легкою, яскравою і збалансованою.",
+        "description_en": "Salmon fillet is baked with zucchini, sweet potato, cherry tomatoes, mushrooms, and red onion. The dish turns out light, bright, and balanced.",
+        "description_pl": "Filet z łososia pieczony jest z cukinią, batatem, pomidorkami cherry, pieczarkami i czerwoną cebulą. Danie jest lekkie, kolorowe i zbilansowane.",
+        "source": "Євген Клопотенко",
+        "source_en": "Yevhen Klopotenko",
+        "source_pl": "Jewhen Klopotenko",
+        "cooking_time": 25,
+        "portions": 2,
+        "calories": 380,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.EUROPEAN, Cuisine.INTERNATIONAL],
+        "meal_times": [MealTime.LUNCH, MealTime.DINNER],
+        "dietary_tags": [Diet.TRADITIONAL, Diet.SEAFOOD_DIET, Diet.HIGH_PROTEIN],
+        "dish_types": [DishType.MAIN, DishType.FISH],
+        "ingredients": [
+            ("Філе лосося", 250, UnitChoice.G),
+            ("Цибуля червона", 100, UnitChoice.G),
+            ("Помідор", 100, UnitChoice.G), # чері
+            ("Кабачок", 150, UnitChoice.G),
+            ("Батат", 150, UnitChoice.G),
+            ("Печериці", 100, UnitChoice.G),
+            ("Тим'ян", 2, UnitChoice.G),
+            ("Оливкова олія", 15, UnitChoice.ML),
+            ("Гірчиця", 10, UnitChoice.G),
+            ("Часник", 5, UnitChoice.G),
+            ("Сіль", 2, UnitChoice.G),
+            ("Перець чорний", 1, UnitChoice.G),
+            ("Орегано", 1, UnitChoice.G),
+            ("Лимон", 0.5, UnitChoice.PCS),
+        ],
+        "steps": [
+            {
+             "uk": "Кабачок, батат, помідори чері, печериці та червону цибулю помийте й наріжте великими шматками.",
+             "en": "Wash the zucchini, sweet potato, cherry tomatoes, mushrooms, and red onion, and cut them into large pieces.",
+             "pl": "Umyj cukinię, batata, pomidorki cherry, pieczarki i czerwoną cebulę i pokrój na duże kawałki."
+            },
+            {
+             "uk": "Перекладіть овочі та гриби в миску. Додайте сіль, перець чорний, орегано й оливкову олію. Перемішайте, щоб овочі рівномірно вкрилися спеціями та олією.",
+             "en": "Transfer the vegetables and mushrooms to a bowl. Add salt, black pepper, oregano, and olive oil. Mix so that the vegetables are evenly coated with spices and oil.",
+             "pl": "Przełóż warzywa i grzyby do miski. Dodaj sól, czarny pieprz, oregano i oliwę z oliwek. Wymieszaj, aby warzywa były równomiernie pokryte przyprawami i oliwą."
+            },
+            {
+             "uk": "Філе лосося злегка посоліть. Змастіть його гірчицею та додайте подрібнений часник.",
+             "en": "Lightly salt the salmon fillet. Brush it with mustard and add minced garlic.",
+             "pl": "Lekko posól filet z łososia. Posmaruj go musztardą i dodaj posiekany czosnek."
+            },
+            {
+             "uk": "Зробіть із пергаменту два імпровізовані «кораблики». На дно кожного викладіть овочеву подушку з кабачка, батату, чері, печериць і червоної цибулі.",
+             "en": "Make two makeshift 'boats' out of parchment paper. At the bottom of each, place a vegetable bed of zucchini, sweet potato, cherry tomatoes, mushrooms, and red onion.",
+             "pl": "Zrób dwie zaimprowizowane 'łódeczki' z papieru do pieczenia. Na dnie każdej z nich ułóż łóżko warzywne z cukinii, batata, pomidorków cherry, pieczarek i czerwonej cebuli."
+            },
+            {
+             "uk": "Поверх овочів покладіть філе лосося. Додайте кілька гілочок тим’яну.",
+             "en": "Place the salmon fillet on top of the vegetables. Add a few sprigs of thyme.",
+             "pl": "Na warzywach połóż filet z łososia. Dodaj kilka gałązek tymianku."
+            },
+            {
+             "uk": "Запікайте в духовці при температурі 180°C протягом 25 хвилин.",
+             "en": "Bake in the oven at 180°C for 25 minutes.",
+             "pl": "Piecz w piekarniku w temperaturze 180°C przez 25 minut."
+            },
+            {
+             "uk": "Перед подачею полийте страву соком лимона.",
+             "en": "Squeeze lemon juice over the dish before serving.",
+             "pl": "Przed podaniem skrop danie sokiem z cytryny."
+            }
+        ]
+    },
+    {
+        "title": "Медова курка з броколі та рисом",
+        "title_en": "Honey soy chicken with broccoli and rice",
+        "title_pl": "Miodowy kurczak z brokułami i ryżem",
+        "description": "Курячі стегна запікаються в медово-соєвому маринаді та подаються з броколі й рисом. Це ситна страва з легким азійським смаком.",
+        "description_en": "Chicken thighs are baked in a honey-soy marinade and served with broccoli and rice. This is a hearty dish with a light Asian flavor.",
+        "description_pl": "Udka z kurczaka pieczone w marynacie miodowo-sojowej i podawane z brokułami i ryżem. To sycące danie o lekkim azjatyckim smaku.",
+        "source": "Sophie Godwin – Cookery writer",
+        "source_en": "Sophie Godwin – Cookery writer",
+        "source_pl": "Sophie Godwin – Cookery writer",
+        "cooking_time": 50,
+        "portions": 4,
+        "calories": 450,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.ASIAN],
+        "meal_times": [MealTime.LUNCH, MealTime.DINNER],
+        "dietary_tags": [Diet.TRADITIONAL, Diet.LACTOSE_FREE],
+        "dish_types": [DishType.MAIN, DishType.MEAT],
+        "ingredients": [
+            ("Курячі стегна", 800, UnitChoice.G),
+            ("Броколі", 300, UnitChoice.G),
+            ("Рис білий", 200, UnitChoice.G),
+            ("Соєвий соус", 45, UnitChoice.ML),
+            ("Мед", 45, UnitChoice.G),
+            ("Рослинна олія", 30, UnitChoice.ML),
+            ("Імбир", 10, UnitChoice.G),
+            ("Часник", 10, UnitChoice.G),
+            ("Кунжутна олія", 5, UnitChoice.ML),
+        ],
+        "steps": [
+            {
+             "uk": "Розігрійте духовку до 200°C. Змішайте соєвий соус, мед, 1 ст.л. рослинної олії, натертий імбир та розчавлений часник.",
+             "en": "Preheat the oven to 200°C. Mix the soy sauce, honey, 1 tbsp vegetable oil, grated ginger, and crushed garlic.",
+             "pl": "Rozgrzej piekarnik do 200°C. Wymieszaj sos sojowy, miód, 1 łyżkę oleju roślinnego, starty imbir i zgnieciony czosnek."
+            },
+            {
+             "uk": "Залийте цим маринадом курячі стегна. Якщо є час, залиште на 30 хвилин.",
+             "en": "Pour this marinade over the chicken thighs. If you have time, leave for 30 minutes.",
+             "pl": "Zalej udka z kurczaka tą marynatą. Jeśli masz czas, zostaw na 30 minut."
+            },
+            {
+             "uk": "Викладіть курку разом з усім маринадом у форму для запікання шкіркою догори. Запікайте 30-35 хвилин до рум'яної скоринки і повної готовності.",
+             "en": "Place the chicken along with all the marinade in a baking dish, skin-side up. Bake for 30-35 minutes until browned and fully cooked.",
+             "pl": "Umieść kurczaka wraz z całą marynatą w naczyniu do pieczenia skórą do góry. Piecz przez 30-35 minut do zrumienienia i całkowitego ugotowania."
+            },
+            {
+             "uk": "Паралельно відваріть рис та розберіть броколі на суцвіття. Броколі відваріть на пару або бланшуйте в окропі 3 хвилини.",
+             "en": "Meanwhile, boil the rice and break the broccoli into florets. Steam the broccoli or blanch it in boiling water for 3 minutes.",
+             "pl": "W międzyczasie ugotuj ryż i podziel brokuły na różyczki. Gotuj brokuły na parze lub blanszuj we wrzątku przez 3 minuty."
+            },
+            {
+             "uk": "Подавайте готову курку з рисом і броколі, поливши страву соками з дека та краплею кунжутної олії для аромату.",
+             "en": "Serve the cooked chicken with rice and broccoli, drizzling the dish with the pan juices and a drop of sesame oil for flavor.",
+             "pl": "Podawaj gotowego kurczaka z ryżem i brokułami, polewając danie sokami z blachy i kroplą oleju sezamowego dla smaku."
+            }
+        ]
+    },
+    {
+        "title": "Запечена картопля по-селянськи з паприкою",
+        "title_en": "Baked potato wedges with paprika",
+        "title_pl": "Pieczone łódeczki ziemniaczane z papryką",
+        "description": "Запечена картопля з паприкою, часником і хрусткою скоринкою. Підходить як гарнір або проста гаряча закуска.",
+        "description_en": "Baked potatoes with paprika, garlic, and a crispy crust. Suitable as a side dish or a simple hot snack.",
+        "description_pl": "Pieczone ziemniaki z papryką, czosnkiem i chrupiącą skórką. Nadaje się jako dodatek do dania głównego lub prosta gorąca przekąska.",
+        "source": "Євген Клопотенко",
+        "source_en": "Yevhen Klopotenko",
+        "source_pl": "Jewhen Klopotenko",
+        "cooking_time": 45,
+        "portions": 4,
+        "calories": 260,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.UKRAINIAN],
+        "meal_times": [MealTime.LUNCH, MealTime.DINNER],
+        "dietary_tags": [Diet.VEGAN, Diet.VEGETARIAN, Diet.GLUTEN_FREE, Diet.LACTOSE_FREE],
+        "dish_types": [DishType.GARNISH],
+        "ingredients": [
+            ("Картопля", 500, UnitChoice.G),
+            ("Паприка", 10, UnitChoice.G),
+            ("Рослинна олія", 45, UnitChoice.ML),
+            ("Сіль", 5, UnitChoice.G),
+            ("Перець чорний", 2, UnitChoice.G),
+            ("Часник", 10, UnitChoice.G),
+        ],
+        "steps": [
+            {
+             "uk": "Бульби ретельно вимийте жорсткою щіткою (шкірку не зрізати) та наріжте рівномірними часточками.",
+             "en": "Thoroughly wash the tubers with a stiff brush (do not peel) and cut into even wedges.",
+             "pl": "Dokładnie umyj bulwy sztywną szczotką (nie obieraj) i pokrój w równe łódeczki."
+            },
+            {
+             "uk": "Змішайте часточки з олією, паприкою, сіллю, перцем та розчавленим часником, переконавшись у повному покритті кожної картоплини плівкою зі спецій.",
+             "en": "Mix the wedges with oil, paprika, salt, pepper, and crushed garlic, making sure each potato is fully coated with a film of spices.",
+             "pl": "Wymieszaj łódeczki z olejem, papryką, solą, pieprzem i rozgniecionym czosnkiem, upewniając się, że każdy ziemniak jest w pełni pokryty warstwą przypraw."
+            },
+            {
+             "uk": "Викладіть на деко з пергаментом шкіркою донизу, залишаючи простір між шматочками для конвекції гарячого повітря.",
+             "en": "Place skin-side down on a baking sheet lined with parchment, leaving space between pieces for hot air convection.",
+             "pl": "Ułóż skórką do dołu na blasze wyłożonej papierem do pieczenia, zostawiając przestrzeń między kawałkami dla konwekcji gorącego powietrza."
+            },
+            {
+             "uk": "Запікайте у попередньо розігрітій до 200°C духовці протягом 30-35 хвилин до хрусткої золотистої скоринки.",
+             "en": "Bake in a preheated 200°C oven for 30-35 minutes until a crispy golden crust forms.",
+             "pl": "Piecz w nagrzanym do 200°C piekarniku przez 30-35 minut, aż utworzy się chrupiąca, złocista skórka."
+            },
+            {
+             "uk": "Подавайте гарячою як самостійну закуску або гарнір до м'яса чи риби.",
+             "en": "Serve hot as a standalone snack or as a side dish to meat or fish.",
+             "pl": "Podawaj na gorąco jako samodzielną przekąskę lub jako dodatek do mięsa lub ryb."
+            }
+        ]
+    },
+    {
+        "title": "Гречка з печерицями та мигдалем",
+        "title_en": "Buckwheat with mushrooms and almonds",
+        "title_pl": "Kasza gryczana z pieczarkami i migdałami",
+        "description": "Гречка поєднується з обсмаженими печерицями, цибулею та мигдалем. Це поживний гарнір або легка основна страва.",
+        "description_en": "Buckwheat is combined with roasted mushrooms, onions, and almonds. This is a nutritious side dish or a light main course.",
+        "description_pl": "Kasza gryczana połączona z pieczonymi pieczarkami, cebulą i migdałami. To pożywny dodatek do dań lub lekkie danie główne.",
+        "source": "Євген Клопотенко",
+        "source_en": "Yevhen Klopotenko",
+        "source_pl": "Jewhen Klopotenko",
+        "cooking_time": 30,
+        "portions": 2,
+        "calories": 340,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.UKRAINIAN, Cuisine.AUTHOR],
+        "meal_times": [MealTime.LUNCH, MealTime.DINNER],
+        "dietary_tags": [Diet.TRADITIONAL, Diet.VEGETARIAN, Diet.GLUTEN_FREE],
+        "dish_types": [DishType.GARNISH, DishType.PORRIDGE],
+        "ingredients": [
+            ("Гречка", 150, UnitChoice.G),
+            ("Вода", 300, UnitChoice.ML),
+            ("Печериці", 300, UnitChoice.G),
+            ("Цибуля ріпчаста", 100, UnitChoice.G),
+            ("Мигдаль", 50, UnitChoice.G),
+            ("Вершкове масло", 50, UnitChoice.G),
+            ("Сіль", 3, UnitChoice.G),
+            ("Перець чорний", 1, UnitChoice.G),
+        ],
+        "steps": [
+            {
+             "uk": "Промийте гречку і відваріть у підсоленій воді (пропорція 1:2) до повного вбирання вологи.",
+             "en": "Wash the buckwheat and boil it in salted water (1:2 ratio) until the moisture is completely absorbed.",
+             "pl": "Opłucz kaszę gryczaną i ugotuj w osolonej wodzie (w proporcji 1:2), aż wilgoć całkowicie się wchłonie."
+            },
+            {
+             "uk": "Наріжте цибулю четвертинками кілець, а печериці — товстими слайсами. Сирий мигдаль грубо порубайте ножем.",
+             "en": "Cut the onion into quarter rings and the mushrooms into thick slices. Roughly chop the raw almonds with a knife.",
+             "pl": "Pokrój cebulę w ćwiartki krążków, a pieczarki w grube plastry. Grubo posiekaj surowe migdały nożem."
+            },
+            {
+             "uk": "На широкій сковороді розтопіть вершкове масло. Обсмажте цибулю до стану м'якості.",
+             "en": "Melt the butter in a wide pan. Sauté the onion until soft.",
+             "pl": "Roztop masło na szerokiej patelni. Podsmaż cebulę, aż zmięknie."
+            },
+            {
+             "uk": "Додайте нарізані печериці, інтенсивно смажте до випаровування вологи та появи рум'янцю; приправте сіллю і перцем. Вмішайте у грибну суміш подрібнений мигдаль.",
+             "en": "Add the sliced mushrooms, fry intensively until moisture evaporates and they become browned; season with salt and pepper. Stir the chopped almonds into the mushroom mixture.",
+             "pl": "Dodaj pokrojone pieczarki, intensywnie smaż, aż wilgoć wyparuje i się zarumienią; dopraw solą i pieprzem. Wymieszaj posiekane migdały z mieszanką grzybową."
+            },
+            {
+             "uk": "Викладіть у сковороду відварену гречку, ретельно перемішайте з грибно-горіховою базою та прогрійте все разом 1-2 хвилини.",
+             "en": "Place the cooked buckwheat in the pan, mix thoroughly with the mushroom-nut base, and heat everything together for 1-2 minutes.",
+             "pl": "Przełóż ugotowaną kaszę gryczaną na patelnię, dokładnie wymieszaj z bazą grzybowo-orzechową i podgrzewaj wszystko razem przez 1-2 minuty."
+            }
+        ]
+    },
+    {
+        "title": "Запечені яблука з рідким медом і волоськими горіхами",
+        "title_en": "Baked apples with liquid honey and walnuts",
+        "title_pl": "Pieczone jabłka z płynnym miodem i orzechami włoskimi",
+        "description": "Яблука запікаються з медом, волоськими горіхами та вершковим маслом. Простий десерт без складної підготовки.",
+        "description_en": "Apples are baked with honey, walnuts, and butter. A simple dessert without complicated preparation.",
+        "description_pl": "Jabłka pieczone z miodem, orzechami włoskimi i masłem. Prosty deser bez skomplikowanego przygotowania.",
+        "source": "Євген Клопотенко",
+        "source_en": "Yevhen Klopotenko",
+        "source_pl": "Jewhen Klopotenko",
+        "cooking_time": 35,
+        "portions": 4,
+        "calories": 220,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.UKRAINIAN],
+        "meal_times": [MealTime.SNACK, MealTime.BREAKFAST],
+        "dietary_tags": [Diet.VEGETARIAN, Diet.DIETARY, Diet.GLUTEN_FREE, Diet.LACTOSE_FREE],
+        "dish_types": [DishType.DESSERT],
+        "ingredients": [
+            ("Яблуко", 600, UnitChoice.G),
+            ("Мед", 40, UnitChoice.G),
+            ("Волоський горіх", 100, UnitChoice.G),
+            ("Вершкове масло", 20, UnitChoice.G),
+        ],
+        "steps": [
+            {
+             "uk": "Яблука ретельно вимийте. За допомогою ножа акуратно виріжте серцевину, не проткнувши дно, щоб утворилася \"чаша\" (залишайте відступ від стінок близько 0.5 см).",
+             "en": "Wash the apples thoroughly. Using a knife, carefully cut out the core without piercing the bottom to form a 'bowl' (leave a margin of about 0.5 cm from the walls).",
+             "pl": "Dokładnie umyj jabłka. Za pomocą noża ostrożnie wytnij gniazda nasienne, nie przebijając dna, aby utworzyć 'miseczkę' (zostaw margines około 0,5 cm od ścianek)."
+            },
+            {
+             "uk": "Волоські горіхи подрібніть ножем або у блендері до середньої крихти.",
+             "en": "Chop the walnuts with a knife or in a blender to a medium crumb.",
+             "pl": "Posiekaj orzechy włoskie nożem lub w blenderze na średniej wielkości okruchy."
+            },
+            {
+             "uk": "У кожне підготовлене яблуко щільно закладіть подрібнені горіхи.",
+             "en": "Tightly pack the chopped nuts into each prepared apple.",
+             "pl": "Szczelnie upchnij posiekane orzechy w każde przygotowane jabłko."
+            },
+            {
+             "uk": "Зверху в кожне яблуко додайте по 1 ч.л. рідкого меду (близько 10 г) та маленький шматочок (5 г) вершкового масла.",
+             "en": "Add 1 tsp of liquid honey (about 10 g) and a small piece (5 g) of butter on top of each apple.",
+             "pl": "Na wierzch każdego jabłka dodaj 1 łyżeczkę płynnego miodu (około 10 g) i mały kawałek (5 g) masła."
+            },
+            {
+             "uk": "Викладіть яблука на деко з пергаментом. Запікайте при 180°C протягом 15-20 хвилин до м'якості, зберігаючи структурну цілісність плоду.",
+             "en": "Place the apples on a baking sheet lined with parchment paper. Bake at 180°C for 15-20 minutes until soft, maintaining the structural integrity of the fruit.",
+             "pl": "Ułóż jabłka na blasze wyłożonej papierem do pieczenia. Piecz w temperaturze 180°C przez 15-20 minut do miękkości, zachowując strukturalną integralność owocu."
+            }
+        ]
     }
 ]
 

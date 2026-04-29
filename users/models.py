@@ -289,14 +289,26 @@ class SiteSettings(models.Model):
         ('aws', 'Amazon AWS (Bedrock)'),
     ]
 
+    # Оновлений список моделей з підказками про їхню потужність
     GEMINI_MODELS = [
-        ('models/gemma-3-27b-it', 'Gemma 3 27B'),
-        ('models/gemma-3-12b-it', 'Gemma 3 12B'),
-        ('models/gemma-3-2b-it', 'Gemma 3 2B'),
-        ('models/gemma-3-4b-it', 'Gemma 3 4B'),
-        ('models/gemma-4-31b-it', 'Gemma 4 31B'),
-        ('models/gemma-4-26b-it', 'Gemma 4 26B'),
-        ('models/gemma-2-27b-it', 'Gemma 2 27B'),
+        # === ФЛАГМАНСЬКІ МОДЕЛІ GEMINI ===
+        ('models/gemini-2.5-pro', '⭐️ НАЙКРАЩА: Gemini 2.5 Pro (Найрозумніша, для складних задач)'),
+        ('models/gemini-2.5-flash', '⚡️ ОПТИМАЛЬНА: Gemini 2.5 Flash (Дуже швидка, ідеальний баланс)'),
+        ('models/gemini-2.5-flash-lite', '🏃 БАЗОВА: Gemini 2.5 Flash Lite (Найдешевша, для простих діалогів)'),
+
+        # === ВІДКРИТІ МОДЕЛІ GEMMA ===
+        ('models/gemma-3-27b-it', '🧠 Gemma 3 27B (Найпотужніша з Gemma)'),
+        ('models/gemma-3-12b-it', '⚖️ Gemma 3 12B (Середня, збалансована Gemma)'),
+        ('models/gemma-3-4b-it', '📱 Gemma 3 4B (Легка Gemma)'),
+        ('models/gemma-3-2b-it', '🪶 Gemma 3 2B (Мікро-модель Gemma)'),
+        ('models/gemma-4-31b-it', '💪 Gemma 4 31B (Експериментальна велика)'),
+        ('models/gemma-4-26b-it', '🛠 Gemma 4 26B (Експериментальна середня)'),
+        ('models/gemma-2-27b-it', '📦 Gemma 2 27B (Стабільна попередня версія)'),
+    ]
+
+    GEMINI_KEY_CHOICES = [
+        ('primary', 'Основний ключ (GEMINI_API_KEY)'),
+        ('secondary', 'Додатковий ключ (GEMINI_API_KEY_1)'),
     ]
 
     is_ai_enabled = models.BooleanField(default=True, verbose_name="Увімкнути ШІ-асистента")
@@ -311,8 +323,15 @@ class SiteSettings(models.Model):
     gemini_model = models.CharField(
         max_length=50,
         choices=GEMINI_MODELS,
-        default='models/gemma-3-12b-it',
+        default='models/gemini-2.5-flash',  # Ставимо оптимальну модель за замовчуванням
         verbose_name="Модель Gemini"
+    )
+
+    gemini_api_key_choice = models.CharField(
+        max_length=20,
+        choices=GEMINI_KEY_CHOICES,
+        default='primary',
+        verbose_name="Ключ API для Gemini"
     )
 
     class Meta:

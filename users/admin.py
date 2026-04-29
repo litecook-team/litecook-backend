@@ -130,10 +130,10 @@ class UnverifiedUserAdmin(admin.ModelAdmin):
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
     # Виводимо всі поля
-    list_display = ('id', 'is_ai_enabled', 'ai_provider', 'gemini_model')
+    list_display = ('id', 'is_ai_enabled', 'ai_provider', 'gemini_api_key_choice', 'gemini_model')
 
     # Робимо їх редагованими прямо зі списку!
-    list_editable = ('is_ai_enabled', 'ai_provider', 'gemini_model')
+    list_editable = ('is_ai_enabled', 'ai_provider', 'gemini_api_key_choice', 'gemini_model')
 
     def has_add_permission(self, request):
         return not SiteSettings.objects.exists()  # Заборонити створювати більше одного налаштування

@@ -717,15 +717,23 @@ class AIChatView(APIView):
         # ==========================================================
         if AI_PROVIDER == 'gemini':
             try:
-                if not getattr(settings, 'GEMINI_API_KEY', None) and not os.environ.get("GEMINI_API_KEY"):
-                    return Response({"error": "Ключ ШІ не налаштовано."}, status=500)
+                # 1. Визначаємо, який саме ключ використовувати згідно з налаштуваннями
+                if settings_obj.gemini_api_key_choice == 'secondary':
+                    active_api_key = getattr(settings, 'GEMINI_API_KEY_1', os.environ.get("GEMINI_API_KEY_1"))
+                else:
+                    active_api_key = getattr(settings, 'GEMINI_API_KEY', os.environ.get("GEMINI_API_KEY"))
 
-                genai.configure(api_key=getattr(settings, 'GEMINI_API_KEY', os.environ.get("GEMINI_API_KEY")))
+                # 2. Перевіряємо, чи взагалі існує обраний ключ
+                if not active_api_key:
+                    return Response({
+                                        "error": f"Обраний ключ ШІ ({settings_obj.get_gemini_api_key_choice_display()}) не налаштовано у .env файлі."},
+                                    status=500)
 
-                # ТЕПЕР БЕРЕМО МОДЕЛЬ З БАЗИ ДАНИХ!
+                # 3. Конфігуруємо ШІ з активним ключем
+                genai.configure(api_key=active_api_key)
+
+                # Беремо модель з бази даних
                 target_model = settings_obj.gemini_model
-
-                model = genai.GenerativeModel(model_name=target_model)
 
                 # # === ПРОСТО ВСТАВТЕ ОДИН ІЗ РЯДКІВ НИЖЧЕ ===
                 # # target_model = "models/gemma-3-27b-it"
@@ -734,8 +742,8 @@ class AIChatView(APIView):
                 # # target_model = "models/gemma-4-26b-it"
                 # # target_model = "models/gemma-4-31b-it"
                 # # target_model = "models/gemma-2-27b-it"
-                #
-                # model = genai.GenerativeModel(model_name=target_model)
+
+                model = genai.GenerativeModel(model_name=target_model)
 
                 formatted_history = [
                     {"role": "user",
@@ -759,7 +767,6 @@ class AIChatView(APIView):
                 if "429" in error_msg or "quota" in error_msg.lower():
                     return Response({"error": t_view('ai_quota', request)}, status=429)
                 return Response({"error": error_msg}, status=500)
-
 
         # ==========================================================
         # ЛОГІКА AMAZON BEDROCK (AWS)

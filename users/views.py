@@ -9,6 +9,11 @@ from .serializers import UserIngredientSerializer
 from dj_rest_auth.registration.views import RegisterView
 from rest_framework.throttling import AnonRateThrottle
 
+from dj_rest_auth.registration.views import VerifyEmailView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.response import Response
+from rest_framework import status
+
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
@@ -38,3 +43,28 @@ class RegistrationThrottle(AnonRateThrottle):
 # 2. Перевизначаємо стандартну реєстрацію, додаючи їй наш щит
 class CustomRegisterView(RegisterView):
     throttle_classes = [RegistrationThrottle]
+
+
+class CustomVerifyEmailView(VerifyEmailView):
+    def post(self, request, *args, **kwargs):
+        # 1. Запускаємо стандартну перевірку ключа від dj-rest-auth
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.kwargs['key'] = serializer.validated_data['key']
+        confirmation = self.get_object()
+
+        # 2. Підтверджуємо пошту в базі даних
+        confirmation.confirm(self.request)
+
+        # 3. Отримуємо користувача, чию пошту щойно підтвердили
+        user = confirmation.email_address.user
+
+        # 4. Генеруємо для нього свіжі JWT-токени
+        refresh = RefreshToken.for_user(user)
+
+        # 5. Повертаємо токени на той пристрій, який зробив POST-запит
+        return Response({
+            'detail': 'ok',
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+        }, status=status.HTTP_200_OK)

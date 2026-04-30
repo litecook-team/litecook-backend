@@ -16,6 +16,32 @@ from recipes.models.ingredient import Ingredient
 
 from allauth.account.signals import user_signed_up
 
+AI_PROVIDER_CHOICES = [
+    ('gemini', 'Google Gemini'),
+    ('aws', 'Amazon AWS (Bedrock)'),
+]
+
+GEMINI_MODELS_CHOICES = [
+    # === ФЛАГМАНСЬКІ МОДЕЛІ GEMINI ===
+    ('models/gemini-2.5-pro', '⭐️ НАЙКРАЩА: Gemini 2.5 Pro (Найрозумніша, для складних задач)'),
+    ('models/gemini-2.5-flash', '⚡️ ОПТИМАЛЬНА: Gemini 2.5 Flash (Дуже швидка, ідеальний баланс)'),
+    ('models/gemini-2.5-flash-lite', '🏃 БАЗОВА: Gemini 2.5 Flash Lite (Найдешевша, для простих діалогів)'),
+
+    # === ВІДКРИТІ МОДЕЛІ GEMMA ===
+    ('models/gemma-3-27b-it', '🧠 Gemma 3 27B (Найпотужніша з Gemma)'),
+    ('models/gemma-3-12b-it', '⚖️ Gemma 3 12B (Середня, збалансована Gemma)'),
+    ('models/gemma-3-4b-it', '📱 Gemma 3 4B (Легка Gemma)'),
+    ('models/gemma-3-2b-it', '🪶 Gemma 3 2B (Мікро-модель Gemma)'),
+    ('models/gemma-4-31b-it', '💪 Gemma 4 31B (Експериментальна велика)'),
+    ('models/gemma-4-26b-it', '🛠 Gemma 4 26B (Експериментальна середня)'),
+    ('models/gemma-2-27b-it', '📦 Gemma 2 27B (Стабільна попередня версія)'),
+]
+
+GEMINI_KEY_CHOICES = [
+    ('primary', 'Основний ключ (GEMINI_API_KEY)'),
+    ('secondary', 'Додатковий ключ (GEMINI_API_KEY_1)'),
+]
+
 
 class CustomUserManager(BaseUserManager):
     """Кастомний менеджер для створення користувачів за email"""
@@ -41,6 +67,14 @@ class CustomUser(AbstractUser):
     email = models.EmailField(unique=True, verbose_name='Email')
     first_name = models.CharField(max_length=150, verbose_name='Ім\'я')
     is_ai_allowed = models.BooleanField(default=False, verbose_name="Доступ до ШІ-помічника")
+
+    # Індивідуальні налаштування ШІ (null=True означає, що за замовчуванням береться глобальне)
+    ai_provider_override = models.CharField(max_length=20, choices=AI_PROVIDER_CHOICES, blank=True, null=True,
+                                            verbose_name="Індивідуальний Провайдер ШІ")
+    gemini_model_override = models.CharField(max_length=50, choices=GEMINI_MODELS_CHOICES, blank=True, null=True,
+                                             verbose_name="Індивідуальна Модель Gemini")
+    gemini_api_key_override = models.CharField(max_length=20, choices=GEMINI_KEY_CHOICES, blank=True, null=True,
+                                               verbose_name="Індивідуальний Ключ API")
 
     # Прапорець для перевірки, чи підтвердив юзер пошту
     is_email_verified = models.BooleanField(default=False, verbose_name="Email підтверджено")
@@ -81,6 +115,10 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return f"{self.first_name} ({self.email})"
+
+    class Meta:
+        verbose_name = "User (Користувач)"
+        verbose_name_plural = "Users (Користувачі)"
 
 
 class UserIngredient(models.Model):
@@ -259,9 +297,9 @@ def delete_old_ingredient_image_on_update(sender, instance, **kwargs):
 
 class UnverifiedUser(CustomUser):
     class Meta:
-        proxy = True  # Це каже Django: НЕ створюй нову таблицю в базі!
-        verbose_name = "Непідтверджений користувач"
-        verbose_name_plural = "Непідтверджені користувачі"
+        proxy = True
+        verbose_name = "Unverified User (Непідтверджений)"
+        verbose_name_plural = "Unverified Users (Непідтверджені)"
 
 
 @receiver(pre_save, sender=CustomUser)
@@ -284,59 +322,18 @@ def save_password_history(sender, instance, **kwargs):
 
 
 class SiteSettings(models.Model):
-    PROVIDER_CHOICES = [
-        ('gemini', 'Google Gemini'),
-        ('aws', 'Amazon AWS (Bedrock)'),
-    ]
-
-    # Оновлений список моделей з підказками про їхню потужність
-    GEMINI_MODELS = [
-        # === ФЛАГМАНСЬКІ МОДЕЛІ GEMINI ===
-        ('models/gemini-2.5-pro', '⭐️ НАЙКРАЩА: Gemini 2.5 Pro (Найрозумніша, для складних задач)'),
-        ('models/gemini-2.5-flash', '⚡️ ОПТИМАЛЬНА: Gemini 2.5 Flash (Дуже швидка, ідеальний баланс)'),
-        ('models/gemini-2.5-flash-lite', '🏃 БАЗОВА: Gemini 2.5 Flash Lite (Найдешевша, для простих діалогів)'),
-
-        # === ВІДКРИТІ МОДЕЛІ GEMMA ===
-        ('models/gemma-3-27b-it', '🧠 Gemma 3 27B (Найпотужніша з Gemma)'),
-        ('models/gemma-3-12b-it', '⚖️ Gemma 3 12B (Середня, збалансована Gemma)'),
-        ('models/gemma-3-4b-it', '📱 Gemma 3 4B (Легка Gemma)'),
-        ('models/gemma-3-2b-it', '🪶 Gemma 3 2B (Мікро-модель Gemma)'),
-        ('models/gemma-4-31b-it', '💪 Gemma 4 31B (Експериментальна велика)'),
-        ('models/gemma-4-26b-it', '🛠 Gemma 4 26B (Експериментальна середня)'),
-        ('models/gemma-2-27b-it', '📦 Gemma 2 27B (Стабільна попередня версія)'),
-    ]
-
-    GEMINI_KEY_CHOICES = [
-        ('primary', 'Основний ключ (GEMINI_API_KEY)'),
-        ('secondary', 'Додатковий ключ (GEMINI_API_KEY_1)'),
-    ]
-
     is_ai_enabled = models.BooleanField(default=True, verbose_name="Увімкнути ШІ-асистента")
 
-    ai_provider = models.CharField(
-        max_length=20,
-        choices=PROVIDER_CHOICES,
-        default='gemini',
-        verbose_name="Провайдер ШІ"
-    )
-
-    gemini_model = models.CharField(
-        max_length=50,
-        choices=GEMINI_MODELS,
-        default='models/gemini-2.5-flash',  # Ставимо оптимальну модель за замовчуванням
-        verbose_name="Модель Gemini"
-    )
-
-    gemini_api_key_choice = models.CharField(
-        max_length=20,
-        choices=GEMINI_KEY_CHOICES,
-        default='primary',
-        verbose_name="Ключ API для Gemini"
-    )
+    ai_provider = models.CharField(max_length=20, choices=AI_PROVIDER_CHOICES, default='gemini',
+                                   verbose_name="Провайдер ШІ")
+    gemini_model = models.CharField(max_length=50, choices=GEMINI_MODELS_CHOICES, default='models/gemini-2.5-flash',
+                                    verbose_name="Модель Gemini")
+    gemini_api_key_choice = models.CharField(max_length=20, choices=GEMINI_KEY_CHOICES, default='primary',
+                                             verbose_name="Ключ API для Gemini")
 
     class Meta:
-        verbose_name = "Налаштування ШІ-асистента"
-        verbose_name_plural = "Налаштування ШІ-асистента"
+        verbose_name = "AI Settings (Налаштування ШІ)"
+        verbose_name_plural = "AI Settings (Налаштування ШІ)"
 
     def save(self, *args, **kwargs):
         self.pk = 1  # Гарантуємо, що буде лише один запис в базі

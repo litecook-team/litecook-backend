@@ -18,8 +18,8 @@ class WeeklyMenu(models.Model):
     meal_type = models.CharField(max_length=20, choices=MEAL_CHOICES, verbose_name="Прийом їжі")
 
     class Meta:
-        verbose_name = "Пункт меню"
-        verbose_name_plural = "Тижневе меню"
+        verbose_name = "Weekly Menu (Тижневе меню)"
+        verbose_name_plural = "Weekly Menus (Тижневі меню)"
         # Користувач може додати два різні рецепти на один і той самий прийом їжі в один день
         unique_together = ('user', 'recipe', 'day_of_week', 'meal_type')
 

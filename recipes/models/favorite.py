@@ -7,8 +7,8 @@ class FavoriteRecipe(models.Model):
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "Улюблений рецепт"
-        verbose_name_plural = "Улюблені рецепти"
+        verbose_name = "Favorite Recipe (Улюблений рецепт)"
+        verbose_name_plural = "Favorite Recipes (Улюблені рецепти)"
         unique_together = ('user', 'recipe')
 
     def __str__(self):

@@ -114,8 +114,8 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        verbose_name = "Інгредієнт"
-        verbose_name_plural = "Інгредієнти"
+        verbose_name = "Ingredient (Інгредієнт)"
+        verbose_name_plural = "Ingredients (Інгредієнти)"
         ordering = ['name']
 
     def __str__(self):

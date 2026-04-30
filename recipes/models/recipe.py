@@ -145,8 +145,8 @@ class Recipe(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Оновлено")
 
     class Meta:
-        verbose_name = "Рецепт"
-        verbose_name_plural = "Рецепти"
+        verbose_name = "Recipe (Рецепт)"
+        verbose_name_plural = "Recipes (Рецепти)"
         # сортуємо за датою створення (найновіші зверху)
         ordering = ['-created_at']
 
@@ -250,8 +250,8 @@ class RecipeOfDay(models.Model):
     recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE, verbose_name="Рецепт")
 
     class Meta:
-        verbose_name = "Рецепт дня"
-        verbose_name_plural = "Рецепти дня"
+        verbose_name = "Recipe of the Day (Рецепт дня)"
+        verbose_name_plural = "Recipes of the Day (Рецепти дня)"
 
     def __str__(self):
         return f"Рецепт дня на {self.date}: {self.recipe.title}"

@@ -707,33 +707,34 @@ class AIChatView(APIView):
 """
 
         # ==========================================================
-        # 🟢 ГОЛОВНИЙ ПЕРЕМИКАЧ ПРОВАЙДЕРІВ ШІ
-        # Вкажіть 'gemini' або 'aws'
+        # 🟢 РОЗУМНИЙ ПЕРЕМИКАЧ ПРОВАЙДЕРІВ (User Override -> Global)
         # ==========================================================
-        AI_PROVIDER = settings_obj.ai_provider
+        user = request.user
+
+        # Беремо індивідуальне налаштування. Якщо воно None (пусте) - беремо глобальне
+        AI_PROVIDER = user.ai_provider_override or settings_obj.ai_provider
+        ACTIVE_KEY_CHOICE = user.gemini_api_key_override or settings_obj.gemini_api_key_choice
+        TARGET_MODEL = user.gemini_model_override or settings_obj.gemini_model
 
         # ==========================================================
         # ЛОГІКА GOOGLE GEMINI
         # ==========================================================
         if AI_PROVIDER == 'gemini':
             try:
-                # 1. Визначаємо, який саме ключ використовувати згідно з налаштуваннями
-                if settings_obj.gemini_api_key_choice == 'secondary':
+                # 1. Використовуємо фінальний вибір ключа
+                if ACTIVE_KEY_CHOICE == 'secondary':
                     active_api_key = getattr(settings, 'GEMINI_API_KEY_1', os.environ.get("GEMINI_API_KEY_1"))
                 else:
                     active_api_key = getattr(settings, 'GEMINI_API_KEY', os.environ.get("GEMINI_API_KEY"))
 
-                # 2. Перевіряємо, чи взагалі існує обраний ключ
                 if not active_api_key:
-                    return Response({
-                                        "error": f"Обраний ключ ШІ ({settings_obj.get_gemini_api_key_choice_display()}) не налаштовано у .env файлі."},
-                                    status=500)
+                    return Response({"error": "Обраний ключ ШІ не налаштовано у .env файлі."}, status=500)
 
-                # 3. Конфігуруємо ШІ з активним ключем
+                # 2. Конфігуруємо ШІ
                 genai.configure(api_key=active_api_key)
 
                 # Беремо модель з бази даних
-                target_model = settings_obj.gemini_model
+                # target_model = settings_obj.gemini_model
 
                 # # === ПРОСТО ВСТАВТЕ ОДИН ІЗ РЯДКІВ НИЖЧЕ ===
                 # # target_model = "models/gemma-3-27b-it"
@@ -743,7 +744,8 @@ class AIChatView(APIView):
                 # # target_model = "models/gemma-4-31b-it"
                 # # target_model = "models/gemma-2-27b-it"
 
-                model = genai.GenerativeModel(model_name=target_model)
+                # 3. Використовуємо фінальний вибір моделі
+                model = genai.GenerativeModel(model_name=TARGET_MODEL)
 
                 formatted_history = [
                     {"role": "user",

@@ -2149,21 +2149,473 @@ RECIPES_DATA = [
              "pl": "Ułóż jabłka na blasze wyłożonej papierem do pieczenia. Piecz w temperaturze 180°C przez 15-20 minut do miękkości, zachowując strukturalną integralność owocu."
             }
         ]
+    },
+    {
+        "title": "Салат Капрезе з томатами та моцарелою",
+        "title_en": "Caprese salad with tomatoes and mozzarella",
+        "title_pl": "Sałatka Caprese z pomidorami i mozzarellą",
+        "description": "Свіжий італійський салат із стиглими томатами, ніжною моцарелою та ароматним базиліком. Ідеально підходить як легка закуска для обіду або вечері.",
+        "description_en": "Fresh Italian salad with ripe tomatoes, tender mozzarella, and fragrant basil. Perfect as a light appetizer for lunch or dinner.",
+        "description_pl": "Świeża włoska sałatka z dojrzałymi pomidorami, delikatną mozzarellą i pachnącą bazylią. Idealna jako lekka przekąska na lunch lub kolację.",
+        "source": "Adam Bush",
+        "source_en": "Adam Bush",
+        "source_pl": "Adam Bush",
+        "cooking_time": 10,
+        "portions": 4,
+        "calories": 242,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.ITALIAN],
+        "meal_times": [MealTime.LUNCH, MealTime.DINNER, MealTime.SNACK],
+        "dietary_tags": [Diet.VEGETARIAN, Diet.GLUTEN_FREE],
+        "dish_types": [DishType.COLD_SNACK, DishType.SALAD],
+        "ingredients": [
+            ("Помідор", 500, UnitChoice.G),
+            ("Моцарела", 250, UnitChoice.G),
+            ("Базилік", 15, UnitChoice.G),
+            ("Оливкова олія", 30, UnitChoice.ML),
+            ("Рисовий оцет", 15, UnitChoice.ML),
+            ("Сіль", 3, UnitChoice.G),
+            ("Перець чорний", 1, UnitChoice.G),
+        ],
+        "steps": [
+            {"uk": "Помийте помідори та наріжте їх шматочками середньої товщини.",
+             "en": "Wash the tomatoes and cut them into medium-thick slices.",
+             "pl": "Umyj pomidory i pokrój je w średniej grubości plastry."},
+            {"uk": "Наріжте сир Моцарела скибочками такої ж товщини, як і помідори.",
+             "en": "Cut the Mozzarella cheese into slices of the same thickness as the tomatoes.",
+             "pl": "Pokrój ser Mozzarella w plastry o tej samej grubości co pomidory."},
+            {"uk": "Викладіть на тарілку, чергуючи: шматочок помідора, шматочок сиру.",
+             "en": "Arrange on a plate, alternating: a slice of tomato, a slice of cheese.",
+             "pl": "Ułóż na talerzu na przemian: plasterek pomidora, plasterek sera."},
+            {"uk": "Зверху рівномірно розкладіть свіже листя базиліку.",
+             "en": "Evenly distribute fresh basil leaves on top.",
+             "pl": "Na wierzchu równomiernie rozłóż świeże liście bazylii."},
+            {"uk": "Посоліть і поперчіть за смаком, після чого збризніть салат оливковою олією та рисовим оцтом. Подавайте одразу.",
+             "en": "Season with salt and pepper to taste, then drizzle the salad with olive oil and rice vinegar. Serve immediately.",
+             "pl": "Dopraw solą i pieprzem do smaku, a następnie skrop sałatkę oliwą z oliwek i octem ryżowym. Podawaj od razu."}
+        ]
+    },
+    {
+        "title": "Запечений Камамбер з горіхами та медом",
+        "title_en": "Baked Camembert with nuts and honey",
+        "title_pl": "Pieczony Camembert z orzechami i miodem",
+        "description": "Гаряча закуска з розплавленим камамбером, солодким медом, волоськими горіхами та ароматом розмарину. Чудовий варіант для святкової страви або вечірнього перекусу.",
+        "description_en": "Hot appetizer with melted Camembert, sweet honey, walnuts, and the aroma of rosemary. A great option for a festive dish or an evening snack.",
+        "description_pl": "Gorąca przekąska z roztopionym Camembertem, słodkim miodem, orzechami włoskimi i aromatem rozmarynu. Świetna opcja na uroczyste danie lub wieczorną przekąskę.",
+        "source": "Helena Busiakiewicz",
+        "source_en": "Helena Busiakiewicz",
+        "source_pl": "Helena Busiakiewicz",
+        "cooking_time": 15,
+        "portions": 4,
+        "calories": 332,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.FRENCH, Cuisine.EUROPEAN],
+        "meal_times": [MealTime.LUNCH, MealTime.DINNER, MealTime.SNACK],
+        "dietary_tags": [Diet.VEGETARIAN, Diet.GLUTEN_FREE],
+        "dish_types": [DishType.HOT_SNACK, DishType.FESTIVE],
+        "ingredients": [
+            ("Камамбер", 250, UnitChoice.G),
+            ("Волоський горіх", 75, UnitChoice.G),
+            ("Мед", 50, UnitChoice.G),
+            ("Паприка", 2, UnitChoice.G),
+            ("Тим'ян", 2, UnitChoice.G),
+            ("Розмарин", 2, UnitChoice.G),
+        ],
+        "steps": [
+            {"uk": "Розігрійте духовку до 180°C. Зробіть ножем неглибокий хрестоподібний надріз на верхівці сиру.",
+             "en": "Preheat the oven to 180°C. Make a shallow cross-shaped cut on the top of the cheese with a knife.",
+             "pl": "Rozgrzej piekarnik do 180°C. Zrób płytkie, krzyżowe nacięcie nożem na wierzchu sera."},
+            {"uk": "Поставте сир у духовку та випікайте камамбер, дотримуючись інструкцій на упаковці .",
+             "en": "Place the cheese in the oven and bake the Camembert following the package instructions.",
+             "pl": "Wstaw ser do piekarnika i piecz Camembert zgodnie z instrukcjami na opakowaniu."},
+            {"uk": "Поки сир запікається, покладіть у невелику каструлю подрібнені горіхи, мед, паприку, розмарин і тим'ян.",
+             "en": "While the cheese is baking, place the chopped nuts, honey, paprika, rosemary, and thyme in a small saucepan.",
+             "pl": "Podczas gdy ser się piecze, włóż do małego rondelka posiekane orzechy, miód, paprykę, rozmaryn i tymianek."},
+            {"uk": "Прогрійте медову суміш на слабкому вогні пару хвилин, постійно помішуючи, поки вона не стане ароматною.",
+             "en": "Warm the honey mixture over low heat for a couple of minutes, stirring constantly, until fragrant.",
+             "pl": "Podgrzewaj miodową mieszankę na małym ogniu przez kilka minut, ciągle mieszając, aż stanie się aromatyczna."},
+            {"uk": "Дістаньте сир з духовки та дайте йому охолонути 3 хвилин. Полийте його гарячою медово-горіховою сумішшю та подавайте з одразу.",
+             "en": "Remove the cheese from the oven and let it cool for 3 minutes. Pour the hot honey-nut mixture over it and serve immediately.",
+             "pl": "Wyjmij ser z piekarnika i pozwól mu ostygnąć przez 3 minuty. Polej gorącą mieszanką miodowo-orzechową i podawaj od razu."}
+        ]
+    },
+    {
+        "title": "Хумус з нуту",
+        "title_en": "Chickpea hummus",
+        "title_pl": "Hummus z ciecierzycy",
+        "description": "Ніжна кремова закуска з нуту з додаванням кунжутної та оливкової олій, лимонного соку і часнику. Добре підходить для поживного перекусу або як доповнення до обіду.",
+        "description_en": "A tender, creamy chickpea snack with the addition of sesame and olive oils, lemon juice, and garlic. Good for a nutritious snack or as a side to lunch.",
+        "description_pl": "Delikatna, kremowa przekąska z ciecierzycy z dodatkiem oleju sezamowego i oliwy z oliwek, soku z cytryny i czosnku. Idealna na pożywną przekąskę lub jako dodatek do obiadu.",
+        "source": "Natasha's Kitchen",
+        "source_en": "Natasha's Kitchen",
+        "source_pl": "Natasha's Kitchen",
+        "cooking_time": 15,
+        "portions": 6,
+        "calories": 180,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.MEDITERRANEAN],
+        "meal_times": [MealTime.LUNCH, MealTime.DINNER, MealTime.SNACK],
+        "dietary_tags": [Diet.VEGAN, Diet.VEGETARIAN, Diet.GLUTEN_FREE, Diet.LACTOSE_FREE],
+        "dish_types": [DishType.COLD_SNACK, DishType.SNACK],
+        "ingredients": [
+            ("Нут", 400, UnitChoice.G),
+            ("Часник", 10, UnitChoice.G),
+            ("Лимонний сік", 45, UnitChoice.ML),
+            ("Оливкова олія", 45, UnitChoice.ML),
+            ("Кунжутна олія", 15, UnitChoice.ML),
+            ("Кмин", 2, UnitChoice.G),
+            ("Сіль", 3, UnitChoice.G),
+            ("Вода", 30, UnitChoice.ML),
+        ],
+        "steps": [
+            {"uk": "Якщо використовуєте консервований нут, добре промийте його водою.",
+             "en": "If using canned chickpeas, rinse them well with water.",
+             "pl": "Jeśli używasz ciecierzycy z puszki, dobrze wypłucz ją wodą."},
+            {"uk": "У чашу блендера додайте лимонний сік, кунжутну олію, оливкову олію та часник. Збийте до однорідності.",
+             "en": "In a blender bowl, add lemon juice, sesame oil, olive oil, and garlic. Blend until smooth.",
+             "pl": "Do kielicha blendera dodaj sok z cytryny, olej sezamowy, oliwę z oliwek i czosnek. Zblenduj na gładką masę."},
+            {"uk": "Додайте в чашу нут, кмин та сіль. Почніть збивати масу.",
+             "en": "Add the chickpeas, cumin, and salt to the bowl. Begin blending the mixture.",
+             "pl": "Dodaj do kielicha ciecierzycę, kmin i sól. Zacznij blendować masę."},
+            {"uk": "Під час збивання додайте трохи крижаної води — це зробить хумус дуже ніжним і пухким.",
+             "en": "While blending, add a little ice water — this will make the hummus very tender and fluffy.",
+             "pl": "Podczas blendowania dodaj trochę lodowatej wody — dzięki temu hummus będzie bardzo delikatny i puszysty."},
+            {"uk": "Збивайте ще 2-3 хвилини до повної гладкості. Перекладіть у тарілку та полийте краплею оливкової олії.",
+             "en": "Blend for another 2-3 minutes until completely smooth. Transfer to a plate and drizzle with a drop of olive oil.",
+             "pl": "Blenduj jeszcze 2-3 minuty, aż będzie całkowicie gładki. Przełóż na talerz i skrop kroplą oliwy z oliwek."}
+        ]
+    },
+    {
+        "title": "Запечені гриби Портобелло з крем-сиром",
+        "title_en": "Baked Portobello mushrooms with cream cheese",
+        "title_pl": "Pieczone grzyby Portobello z serkiem śmietankowym",
+        "description": "Ситна гаряча закуска з великих грибів портобелло, фаршированих ніжним крем-сиром і пармезаном. Відмінний вибір для легкої вечері або теплого перекусу.",
+        "description_en": "A hearty hot appetizer of large portobello mushrooms stuffed with delicate cream cheese and parmesan. An excellent choice for a light dinner or a warm snack.",
+        "description_pl": "Sycąca gorąca przekąska z dużych grzybów portobello faszerowanych delikatnym serkiem śmietankowym i parmezanem. Doskonały wybór na lekką kolację lub ciepłą przekąskę.",
+        "source": "Джеймі Олівер",
+        "source_en": "Jamie Oliver",
+        "source_pl": "Jamiego Olivera",
+        "cooking_time": 35,
+        "portions": 4,
+        "calories": 185,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.ITALIAN, Cuisine.EUROPEAN],
+        "meal_times": [MealTime.LUNCH, MealTime.DINNER, MealTime.SNACK],
+        "dietary_tags": [Diet.VEGETARIAN, Diet.GLUTEN_FREE],
+        "dish_types": [DishType.HOT_SNACK, DishType.SNACK],
+        "ingredients": [
+            ("Портобелло", 400, UnitChoice.G),
+            ("Крем-сир", 150, UnitChoice.G),
+            ("Пармезан", 40, UnitChoice.G),
+            ("Лимонний сік", 10, UnitChoice.ML),
+            ("Перець чилі", 5, UnitChoice.G),
+            ("Орегано", 3, UnitChoice.G),
+            ("Оливкова олія", 15, UnitChoice.ML),
+            ("Сіль", 3, UnitChoice.G),
+            ("Перець чорний", 2, UnitChoice.G),
+        ],
+        "steps": [
+            {"uk": "Розігрійте духовку до 220°C.",
+             "en": "Preheat the oven to 220°C.",
+             "pl": "Rozgrzej piekarnik do 220°C."},
+            {"uk": "Обережно видаліть ніжки у грибів. Змастіть капелюшки оливковою олією з усіх боків, трохи посоліть.",
+             "en": "Carefully remove the stems from the mushrooms. Brush the caps with olive oil on all sides, salt slightly.",
+             "pl": "Ostrożnie usuń nóżki z grzybów. Posmaruj kapelusze oliwą z oliwek ze wszystkich stron, lekko posól."},
+            {"uk": "У мисці змішайте крем-сир, лимонний сік, дрібно нарізаний чилі, орегано, сіль та чорний перець.",
+             "en": "In a bowl, mix cream cheese, lemon juice, finely chopped chili, oregano, salt, and black pepper.",
+             "pl": "W misce wymieszaj serek śmietankowy, sok z cytryny, drobno posiekane chili, oregano, sól i czarny pieprz."},
+            {"uk": "Викладіть гриби на деко і наповніть капелюшки сирною начинкою.",
+             "en": "Place the mushrooms on a baking sheet and fill the caps with the cheese filling.",
+             "pl": "Ułóż grzyby na blasze do pieczenia i wypełnij kapelusze farszem serowym."},
+            {"uk": "Посипте зверху натертим Пармезаном і запікайте 15 хвилин до золотистої скоринки.",
+             "en": "Sprinkle with grated Parmesan on top and bake for 15 minutes until golden brown.",
+             "pl": "Posyp po wierzchu startym parmezanem i piecz przez 15 minut na złoty kolor."}
+        ]
+    },
+    {
+        "title": "Класичний лимонад",
+        "title_en": "Classic lemonade",
+        "title_pl": "Klasyczna lemoniada",
+        "description": "Освіжаючий напій із лимонного соку, цедри та м'яти з приємною кисло-солодкою ноткою. Ідеально підходить для втамування спраги під час обіду або перекусу у спекотні дні.",
+        "description_en": "A refreshing drink made from lemon juice, zest, and mint with a pleasant sweet and sour note. Perfect for quenching your thirst during lunch or a snack on hot days.",
+        "description_pl": "Orzeźwiający napój z soku z cytryny, skórki i mięty o przyjemnej słodko-kwaśnej nucie. Idealny do ugaszenia pragnienia podczas lunchu lub przekąski w gorące dni.",
+        "source": "Євген Клопотенко",
+        "source_en": "Yevhen Klopotenko",
+        "source_pl": "Jewhen Klopotenko",
+        "cooking_time": 30,
+        "portions": 5,
+        "calories": 110,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.AUTHOR],
+        "meal_times": [MealTime.LUNCH, MealTime.SNACK],
+        "dietary_tags": [Diet.VEGAN, Diet.GLUTEN_FREE, Diet.LACTOSE_FREE],
+        "dish_types": [DishType.DRINK],
+        "ingredients": [
+            ("Лимон", 3, UnitChoice.PCS),
+            ("Вода", 2000, UnitChoice.ML),
+            ("Цукор", 150, UnitChoice.G),
+            ("М'ята", 10, UnitChoice.G),
+        ],
+        "steps": [
+            {"uk": "Зріжте жовту цедру з двох лимонів, намагаючись не чіпати білу частину. Вичавіть з цих лимонів сік.",
+             "en": "Cut the yellow zest from two lemons, trying not to touch the white pith. Squeeze the juice from these lemons.",
+             "pl": "Zetnij żółtą skórkę z dwóch cytryn, starając się nie dotykać białej części. Wyciśnij sok z tych cytryn."},
+            {"uk": "Третій лимон наріжте гарними кружальцями для подачі.",
+             "en": "Slice the third lemon into nice rounds for serving.",
+             "pl": "Trzecią cytrynę pokrój w ładne plasterki do podania."},
+            {"uk": "У каструлю налийте 500 мл води, додайте цукор, лимонний сік та зрізану цедру. Доведіть до кипіння і поваріть 5 хвилин.",
+             "en": "Pour 500 ml of water into a saucepan, add sugar, lemon juice, and the removed zest. Bring to a boil and simmer for 5 minutes.",
+             "pl": "Wlej 500 ml wody do rondla, dodaj cukier, sok z cytryny i ściętą skórkę. Doprowadź do wrzenia i gotuj przez 5 minut."},
+            {"uk": "Процідіть готовий сироп через сито і дайте йому повністю охолонути.",
+             "en": "Strain the finished syrup through a sieve and let it cool completely.",
+             "pl": "Przecedź gotowy syrop przez sitko i odstaw do całkowitego ostygnięcia."},
+            {"uk": "У великий глечик покладіть кружальця лимона, свіжу м'яту, влийте охолоджений сироп і додайте 1500 мл холодної води. Добре перемішайте.",
+             "en": "In a large pitcher, place the lemon slices, fresh mint, pour in the cooled syrup, and add 1500 ml of cold water. Mix well.",
+             "pl": "Do dużego dzbanka włóż plasterki cytryny, świeżą miętę, wlej ostudzony syrop i dodaj 1500 ml zimnej wody. Dobrze wymieszaj."}
+        ]
+    },
+    {
+        "title": "Безалкогольний імбирний ель",
+        "title_en": "Non-alcoholic ginger ale",
+        "title_pl": "Bezalkoholowy imbirny ale",
+        "description": "Пряний домашній напій на основі свіжого імбиру та лимона з легкою природною газацією. Чудово зігріває та підходить для будь-якого прийому їжі або як самостійний перекус.",
+        "description_en": "A spicy homemade drink based on fresh ginger and lemon with light natural carbonation. Warms you up wonderfully and is suitable for any meal or as an independent snack.",
+        "description_pl": "Pikantny domowy napój na bazie świeżego imbiru i cytryny z lekkim naturalnym nagazowaniem. Wspaniale rozgrzewa i nadaje się do każdego posiłku lub jako samodzielna przekąska.",
+        "source": "Євген Клопотенко",
+        "source_en": "Yevhen Klopotenko",
+        "source_pl": "Jewhen Klopotenko",
+        "cooking_time": 1480,
+        "portions": 10,
+        "calories": 85,
+        "difficulty": Difficulty.MEDIUM,
+        "cuisine": [Cuisine.EUROPEAN],
+        "meal_times": [MealTime.BREAKFAST, MealTime.LUNCH, MealTime.DINNER, MealTime.SNACK],
+        "dietary_tags": [Diet.VEGAN, Diet.GLUTEN_FREE, Diet.LACTOSE_FREE],
+        "dish_types": [DishType.DRINK],
+        "ingredients": [
+            ("Імбир", 40, UnitChoice.G),
+            ("Цукор", 40, UnitChoice.G),
+            ("Лимон", 2, UnitChoice.PCS),
+            ("Вода", 4000, UnitChoice.ML),
+        ],
+        "steps": [
+            {"uk": "У великій каструлі закип'ятіть 2 літри води.",
+             "en": "Boil 2 liters of water in a large pot.",
+             "pl": "W dużym garnku zagotuj 2 litry wody."},
+            {"uk": "Очистіть імбир, натріть його на тертці, додайте в окріп і варіть на слабкому вогні 30 хвилин.",
+             "en": "Peel the ginger, grate it, add to boiling water, and simmer over low heat for 30 minutes.",
+             "pl": "Obierz imbir, zetrzyj go na tarce, dodaj do wrzącej wody i gotuj na małym ogniu przez 30 minut."},
+            {"uk": "Процідіть напій через сито. Відварений імбир не викидайте — він ще знадобиться.",
+             "en": "Strain the drink through a sieve. Do not throw away the boiled ginger — it will still be needed.",
+             "pl": "Przecedź napój przez sitko. Nie wyrzucaj ugotowanego imbiru — nadal się przyda."},
+            {"uk": "Додайте в гарячу рідину цукор і перемішайте до розчинення. Влийте лимонний сік і ще 2 літри холодної води.",
+             "en": "Add sugar to the hot liquid and stir until dissolved. Pour in the lemon juice and another 2 liters of cold water.",
+             "pl": "Dodaj cukier do gorącego płynu i mieszaj aż do rozpuszczenia. Wlej sok z cytryny i kolejne 2 litry zimnej wody."},
+            {"uk": "Поверніть у напій залишки імбиру. Залиште банку при кімнатній температурі на 24 години, щоб з'явилися легкі бульбашки, потім процідіть і поставте в холодильник.",
+             "en": "Return the remaining ginger to the drink. Leave the jar at room temperature for 24 hours until light bubbles appear, then strain and refrigerate.",
+             "pl": "Dodaj resztki imbiru z powrotem do napoju. Pozostaw słoik w temperaturze pokojowej na 24 godziny, aż pojawią się lekkie bąbelki, następnie przecedź i wstaw do lodówki."}
+        ]
+    },
+    {
+        "title": "Ягідний смузі з мигдальним молоком",
+        "title_en": "Berry smoothie with almond milk",
+        "title_pl": "Smoothie jagodowe z mlekiem migdałowym",
+        "description": "Густий і поживний напій із заморожених ягід, банана, вівсяних пластівців та мигдального молока. Швидкий і корисний варіант для сніданку або енергійного перекусу.",
+        "description_en": "A thick and nutritious drink made from frozen berries, banana, oat flakes, and almond milk. A quick and healthy option for breakfast or an energetic snack.",
+        "description_pl": "Gęsty i pożywny napój z mrożonych jagód, banana, płatków owsianych i mleka migdałowego. Szybka i zdrowa opcja na śniadanie lub energetyczną przekąskę.",
+        "source": "Джеймі Олівер",
+        "source_en": "Jamie Oliver",
+        "source_pl": "Jamiego Olivera",
+        "cooking_time": 10,
+        "portions": 4,
+        "calories": 160,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.BRITISH, Cuisine.INTERNATIONAL],
+        "meal_times": [MealTime.BREAKFAST, MealTime.SNACK],
+        "dietary_tags": [Diet.VEGETARIAN],
+        "dish_types": [DishType.SMOOTHIE, DishType.DRINK],
+        "ingredients": [
+            ("Малина", 100, UnitChoice.G),
+            ("Полуниця", 100, UnitChoice.G),
+            ("Мигдальне молоко", 300, UnitChoice.ML),
+            ("Йогурт", 90, UnitChoice.G),
+            ("Банан", 1, UnitChoice.PCS),
+            ("Вівсяні пластівці", 35, UnitChoice.G),
+            ("Насіння льону", 15, UnitChoice.G),
+            ("Мед", 15, UnitChoice.G),
+        ],
+        "steps": [
+            {"uk": "Очистіть банан від шкірки та наріжте його шматочками.",
+             "en": "Peel the banana and cut it into pieces.",
+             "pl": "Obierz banana i pokrój go na kawałki."},
+            {"uk": "Помістіть заморожені ягоди, банан і йогурт у чашу блендера.",
+             "en": "Place the frozen berries, banana, and yogurt in a blender bowl.",
+             "pl": "Umieść zamrożone owoce, banana i jogurt w kielichu blendera."},
+            {"uk": "Додайте мигдальне молоко, вівсяні пластівці, насіння льону та мед.",
+             "en": "Add almond milk, oat flakes, flax seeds, and honey.",
+             "pl": "Dodaj mleko migdałowe, płatki owsiane, nasiona lnu i miód."},
+            {"uk": "Збивайте все на високій швидкості близько хвилини, поки маса не стане повністю однорідною.",
+             "en": "Blend everything on high speed for about a minute until the mixture is completely smooth.",
+             "pl": "Miksuj wszystko na wysokich obrotach przez około minutę, aż masa będzie całkowicie jednolita."},
+            {"uk": "Розлийте смузі у склянки та подавайте одразу.",
+             "en": "Pour the smoothie into glasses and serve immediately.",
+             "pl": "Przelej smoothie do szklanek i podawaj od razu."}
+        ]
+    },
+    {
+        "title": "Гарячий шоколад від Гордона Рамзі",
+        "title_en": "Gordon Ramsay's hot chocolate",
+        "title_pl": "Gorąca czekolada Gordona Ramsaya",
+        "description": "Насичений зігріваючий напій з темного шоколаду та молока, доповнений несподіваною ноткою оливкової олії. Ідеальний десертний напій для затишної вечері або солодкого перекусу.",
+        "description_en": "A rich, warming drink made of dark chocolate and milk, complemented by an unexpected hint of olive oil. The perfect dessert drink for a cozy dinner or sweet snack.",
+        "description_pl": "Bogaty, rozgrzewający napój z ciemnej czekolady i mleka, dopełniony nieoczekiwaną nutą oliwy z oliwek. Idealny napój deserowy na przytulną kolację lub słodką przekąskę.",
+        "source": "Гордон Рамзі",
+        "source_en": "Gordon Ramsay",
+        "source_pl": "Gordona Ramsaya",
+        "cooking_time": 10,
+        "portions": 2,
+        "calories": 340,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.BRITISH, Cuisine.AUTHOR],
+        "meal_times": [MealTime.SNACK, MealTime.DINNER],
+        "dietary_tags": [Diet.VEGETARIAN, Diet.GLUTEN_FREE],
+        "dish_types": [DishType.DRINK, DishType.DESSERT],
+        "ingredients": [
+            ("Молоко", 150, UnitChoice.ML),
+            ("Темний шоколад", 70, UnitChoice.G),
+            ("Оливкова олія", 15, UnitChoice.ML),
+            ("Цукор", 15, UnitChoice.G),
+            ("Сіль", 1, UnitChoice.G),
+        ],
+        "steps": [
+            {"uk": "Дрібно порубайте темний шоколад ножем.",
+             "en": "Finely chop the dark chocolate with a knife.",
+             "pl": "Drobno posiekaj gorzką czekoladę nożem."},
+            {"uk": "Налийте молоко в невелику каструлю і нагрійте майже до кипіння, але не кип'ятіть.",
+             "en": "Pour the milk into a small saucepan and heat almost to boiling, but do not boil.",
+             "pl": "Wlej mleko do małego rondelka i podgrzej prawie do wrzenia, ale nie gotuj."},
+            {"uk": "Зніміть молоко з вогню. Додайте подрібнений шоколад, цукор та дрібку солі.",
+             "en": "Remove the milk from the heat. Add the chopped chocolate, sugar, and a pinch of salt.",
+             "pl": "Zdejmij mleko z ognia. Dodaj posiekaną czekoladę, cukier i szczyptę soli."},
+            {"uk": "Добре перемішуйте вінчиком, поки шоколад повністю не розчиниться.",
+             "en": "Whisk well until the chocolate is completely dissolved.",
+             "pl": "Dobrze wymieszaj trzepaczką, aż czekolada całkowicie się rozpuści."},
+            {"uk": "Додайте оливкову олію, ще раз енергійно перемішайте та одразу розлийте по чашках.",
+             "en": "Add the olive oil, whisk vigorously again, and immediately pour into cups.",
+             "pl": "Dodaj oliwę z oliwek, jeszcze raz energicznie wymieszaj i od razu rozlej do filiżanek."}
+        ]
+    },
+    {
+        "title": "Пудинг з насіння чіа та свіжими ягодами",
+        "title_en": "Chia seed pudding with fresh berries",
+        "title_pl": "Pudding z nasion chia ze świeżymi jagodami",
+        "description": "Легкий десерт на основі мигдального молока та насіння чіа, підсолоджений медом і прикрашений свіжими ягодами. Відмінно підходить для корисного сніданку або легкого перекусу.",
+        "description_en": "A light dessert based on almond milk and chia seeds, sweetened with honey and decorated with fresh berries. Great for a healthy breakfast or a light snack.",
+        "description_pl": "Lekki deser na bazie mleka migdałowego i nasion chia, słodzony miodem i udekorowany świeżymi owocami. Doskonały na zdrowe śniadanie lub lekką przekąskę.",
+        "source": "Jeanine Donofrio, Phoebe Moore",
+        "source_en": "Jeanine Donofrio, Phoebe Moore",
+        "source_pl": "Jeanine Donofrio, Phoebe Moore",
+        "cooking_time": 15,
+        "portions": 2,
+        "calories": 210,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.AUTHOR, Cuisine.INTERNATIONAL],
+        "meal_times": [MealTime.BREAKFAST, MealTime.SNACK],
+        "dietary_tags": [Diet.GLUTEN_FREE, Diet.LACTOSE_FREE],
+        "dish_types": [DishType.DESSERT],
+        "ingredients": [
+            ("Насіння чіа", 50, UnitChoice.G),
+            ("Мигдальне молоко", 240, UnitChoice.ML),
+            ("Мед", 30, UnitChoice.G),
+            ("Чорниця", 50, UnitChoice.G),
+            ("Полуниця", 50, UnitChoice.G),
+        ],
+        "steps": [
+            {"uk": "У скляній банці або глибокій мисці змішайте насіння чіа, мигдальне молоко та мед.",
+             "en": "In a glass jar or deep bowl, mix the chia seeds, almond milk, and honey.",
+             "pl": "W szklanym słoiku lub głębokiej misce wymieszaj nasiona chia, mleko migdałowe i miód."},
+            {"uk": "Добре перемішайте ложкою, щоб насіння не злипалося в грудочки.",
+             "en": "Mix well with a spoon so the seeds do not stick together in clumps.",
+             "pl": "Dobrze wymieszaj łyżką, aby nasiona nie sklejały się w grudki."},
+            {"uk": "Залиште постояти 10 хвилин, а потім ще раз ретельно перемішайте.",
+             "en": "Let it sit for 10 minutes, then mix thoroughly again.",
+             "pl": "Odstaw na 10 minut, a następnie jeszcze raz dokładnie wymieszaj."},
+            {"uk": "Накрийте банку кришкою і поставте в холодильник мінімум на 2 години, щоб маса загусла.",
+             "en": "Cover the jar with a lid and place in the refrigerator for at least 2 hours so the mixture thickens.",
+             "pl": "Przykryj słoik pokrywką i wstaw do lodówki na co najmniej 2 godziny, aby masa zgęstniała."},
+            {"uk": "Перед подачею прикрасьте пудинг свіжими ягодами полуниці та чорниці.",
+             "en": "Before serving, garnish the pudding with fresh strawberries and blueberries.",
+             "pl": "Przed podaniem udekoruj pudding świeżymi truskawkami i jagodami."}
+        ]
+    },
+    {
+        "title": "Желе зі свіжої малини",
+        "title_en": "Fresh raspberry jelly",
+        "title_pl": "Galaretka ze świeżych malin",
+        "description": "Прозорий і легкий ягідний десерт із свіжої малини та лимонного соку на основі желатину. Освіжаючий варіант для літнього перекусу або післяобіднього десерту.",
+        "description_en": "A clear and light berry dessert made from fresh raspberries and lemon juice based on gelatin. A refreshing option for a summer snack or afternoon dessert.",
+        "description_pl": "Przezroczysty i lekki deser jagodowy ze świeżych malin i soku z cytryny na bazie żelatyny. Orzeźwiająca opcja na letnią przekąskę lub popołudniowy deser.",
+        "source": "Miriam Nice",
+        "source_en": "Miriam Nice",
+        "source_pl": "Miriam Nice",
+        "cooking_time": 20,
+        "portions": 4,
+        "calories": 140,
+        "difficulty": Difficulty.EASY,
+        "cuisine": [Cuisine.BRITISH, Cuisine.EUROPEAN],
+        "meal_times": [MealTime.LUNCH, MealTime.DINNER, MealTime.SNACK],
+        "dietary_tags": [Diet.TRADITIONAL, Diet.LACTOSE_FREE, Diet.GLUTEN_FREE],
+        "dish_types": [DishType.DESSERT],
+        "ingredients": [
+            ("Малина", 500, UnitChoice.G),
+            ("Цукор", 140, UnitChoice.G),
+            ("Желатин", 12, UnitChoice.G),
+            ("Вода", 300, UnitChoice.ML),
+            ("Лимонний сік", 15, UnitChoice.ML),
+            ("Рослинна олія", 2, UnitChoice.ML),
+        ],
+        "steps": [
+            {"uk": "Замочіть 12 г порошкового желатину у 50–60 мл холодної води на 10–15 хвилин, щоб він набух. Злегка змастіть форму для желе олією.",
+             "en": "Soak 12 g of powdered gelatin in 50-60 ml of cold water for 10-15 minutes so it swells. Lightly grease a jelly mold with oil.",
+             "pl": "Namocz 12 g żelatyny w proszku w 50-60 ml zimnej wody przez 10-15 minut, aby napęczniała. Lekko nasmaruj formę do galaretki olejem."},
+            {"uk": "У каструлю налийте 300 мл води, додайте цукор і нагрійте до його розчинення.",
+             "en": "Pour 300 ml of water into a saucepan, add sugar, and heat until dissolved.",
+             "pl": "Wlej 300 ml wody do rondla, dodaj cukier i podgrzewaj do jego rozpuszczenia."},
+            {"uk": "Додайте малину, доведіть до кипіння і поваріть 5 хвилин на слабкому вогні.",
+             "en": "Add raspberries, bring to a boil, and simmer for 5 minutes over low heat.",
+             "pl": "Dodaj maliny, doprowadź do wrzenia i gotuj na małym ogniu przez 5 minut."},
+            {"uk": "Протріть ягідну масу через сито, щоб позбутися кісточок. Влийте лимонний сік.",
+             "en": "Push the berry mixture through a sieve to remove the seeds. Stir in the lemon juice.",
+             "pl": "Przetrzyj masę jagodową przez sito, aby pozbyć się pestek. Wlej sok z cytryny."},
+            {"uk": "Додайте набухлий желатин у гарячий малиновий сироп, але не кип’ятіть. Перемішайте до повного розчинення, розлийте у форми і поставте в холодильник на ніч.",
+             "en": "Add the swollen gelatin to the hot raspberry syrup, but do not boil. Stir until completely dissolved, pour into molds, and refrigerate overnight.",
+             "pl": "Dodaj napęczniałą żelatynę do gorącego syropu malinowego, ale nie gotuj. Wymieszaj do całkowitego rozpuszczenia, rozlej do foremek i wstaw do lodówki na noc."}
+        ]
     }
 ]
 
-def run():
-    print("🧹 Очищення старих рецептів...")
-    Recipe.objects.all().delete()
-    print("✅ Базу рецептів очищено. Починаємо завантаження нових...\n")
+def run(clear_db=False):
+    if clear_db:
+        print("🧹 Очищення старих рецептів...")
+        Recipe.objects.all().delete()
+        print("✅ Базу рецептів очищено. Починаємо завантаження нових...\n")
+    else:
+        print("🚀 Запуск у режимі ДОДАВАННЯ нових рецептів (існуючі не видаляються)...\n")
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     images_dir = os.path.join(base_dir, 'seed_recipe_images')
     extensions = ['.jpg', '.jpeg', '.png', '.webp']
 
     added_count = 0
+    skipped_count = 0
 
     for data in RECIPES_DATA:
+        # Перевіряємо, чи існує рецепт з такою назвою (уникаємо дублювання)
+        if Recipe.objects.filter(title=data["title"]).exists():
+            print(f"⏩ Пропущено: '{data['title']}' (вже існує в базі)")
+            skipped_count += 1
+            continue
+
         print(f"🔄 Створюємо: {data['title']}...")
 
         recipe = Recipe.objects.create(
@@ -2228,7 +2680,11 @@ def run():
         print(f"✅ Успішно додано: {data['title']}\n")
         added_count += 1
 
-    print(f"🎉 Готово! Додано нових рецептів: {added_count}")
+    print(f"🎉 Готово! Додано нових рецептів: {added_count}. Пропущено: {skipped_count}.")
 
 if __name__ == '__main__':
-    run()
+    # ================= РЕЖИМ РОБОТИ СКРИПТА =================
+    # Щоб ТІЛЬКИ ДОДАТИ нові рецепти (без видалення старих), залишайте: run(clear_db=False)
+    # Щоб ВИДАЛИТИ ВСЕ і завантажити заново, змініть на: run(clear_db=True)
+
+    run(clear_db=False)

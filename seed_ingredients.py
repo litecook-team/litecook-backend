@@ -314,6 +314,9 @@ INGREDIENTS_DATA = [
     ("Фенхель (насіння)", "Fennel seeds", "Nasiona kopru włoskiego", IngredientCategory.SPICES, False, []),
     ("Кокосове молоко", "Coconut milk", "Mleko kokosowe", IngredientCategory.OILS_LIQUIDS, False, []),
     ("Пападам", "Papadum", "Papadum", IngredientCategory.GRAINS, False, []),
+
+    ("Хліб", "Bread", "Chleb", IngredientCategory.FLOUR, False, []),
+    ("Сало", "Pork fat", "Słonina", IngredientCategory.MEAT_PORK, False, []),
 ]
 
 

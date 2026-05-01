@@ -2594,28 +2594,18 @@ RECIPES_DATA = [
     }
 ]
 
-def run(clear_db=False):
-    if clear_db:
-        print("🧹 Очищення старих рецептів...")
-        Recipe.objects.all().delete()
-        print("✅ Базу рецептів очищено. Починаємо завантаження нових...\n")
-    else:
-        print("🚀 Запуск у режимі ДОДАВАННЯ нових рецептів (існуючі не видаляються)...\n")
+def run():
+    print("🧹 Очищення старих рецептів...")
+    Recipe.objects.all().delete()
+    print("✅ Базу рецептів очищено. Починаємо завантаження нових...\n")
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     images_dir = os.path.join(base_dir, 'seed_recipe_images')
     extensions = ['.jpg', '.jpeg', '.png', '.webp']
 
     added_count = 0
-    skipped_count = 0
 
     for data in RECIPES_DATA:
-        # Перевіряємо, чи існує рецепт з такою назвою (уникаємо дублювання)
-        if Recipe.objects.filter(title=data["title"]).exists():
-            print(f"⏩ Пропущено: '{data['title']}' (вже існує в базі)")
-            skipped_count += 1
-            continue
-
         print(f"🔄 Створюємо: {data['title']}...")
 
         recipe = Recipe.objects.create(
@@ -2680,11 +2670,7 @@ def run(clear_db=False):
         print(f"✅ Успішно додано: {data['title']}\n")
         added_count += 1
 
-    print(f"🎉 Готово! Додано нових рецептів: {added_count}. Пропущено: {skipped_count}.")
+    print(f"🎉 Готово! Додано нових рецептів: {added_count}")
 
 if __name__ == '__main__':
-    # ================= РЕЖИМ РОБОТИ СКРИПТА =================
-    # Щоб ТІЛЬКИ ДОДАТИ нові рецепти (без видалення старих), залишайте: run(clear_db=False)
-    # Щоб ВИДАЛИТИ ВСЕ і завантажити заново, змініть на: run(clear_db=True)
-
-    run(clear_db=False)
+    run()

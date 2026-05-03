@@ -31,6 +31,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 GEMINI_API_KEY_1 = os.environ.get('GEMINI_API_KEY_1')
 
+# RECAPTCHA_SECRET_KEY = os.environ.get('RECAPTCHA_SECRET_KEY')
+RECAPTCHA_SECRET_KEY = os.environ.get('RECAPTCHA_SECRET_KEY_2')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

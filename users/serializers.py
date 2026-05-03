@@ -5,6 +5,7 @@ from dj_rest_auth.serializers import UserDetailsSerializer
 from .models import CustomUser, UserIngredient
 from dj_rest_auth.serializers import PasswordResetSerializer
 from django.conf import settings
+import requests
 
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode
@@ -38,6 +39,16 @@ def t_msg(key, request):
             'en': "Invalid link or user does not exist.",
             'pl': "Nieprawidłowy link lub użytkownik nie istnieje."
         },
+        'invalid_captcha': {
+            'uk': "Перевірка на робота не пройдена. Оновіть сторінку і спробуйте ще раз.",
+            'en': "Robot verification failed. Refresh the page and try again.",
+            'pl': "Weryfikacja robota nie powiodła się. Odśwież stronę i spróbuj ponownie."
+        },
+        'captcha_conn_err': {
+            'uk': "Помилка з'єднання з сервером перевірки CAPTCHA. Спробуйте пізніше.",
+            'en': "Connection error with CAPTCHA verification server. Try again later.",
+            'pl': "Błąd połączenia z serwerem weryfikacji CAPTCHA. Spróbuj ponownie później."
+        },
         'token_expired': {
             'uk': "Посилання застаріло або вже було використане. Надішліть новий запит.",
             'en': "The link has expired or has already been used. Please submit a new request.",
@@ -56,15 +67,52 @@ class CustomRegisterSerializer(RegisterSerializer):
     # 1. Прибираємо поле username з форми
     username = None
     # 2. Додаємо наше обов'язкове поле Ім'я
-    first_name = serializers.CharField(max_length=150, required=True, label="Ім'я")
+    first_name = serializers.CharField(max_length=70, required=True, label="Ім'я")
 
-    # Цей метод примусово змінює порядок полів у формі
+    # записується тільки при прийомі даних (write_only)
+    captcha_token = serializers.CharField(write_only=True, required=True, label="Captcha Token")
+
+    # метод примусово змінює порядок полів у формі
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Вказуємо бажаний порядок
-        field_order = ['first_name', 'email', 'password1', 'password2']
+        field_order = ['first_name', 'email', 'password1', 'password2', 'captcha_token']
         # Перезбираємо словник полів у новому порядку
         self.fields = {key: self.fields[key] for key in field_order if key in self.fields}
+
+    # Використовуємо загальний метод validate для надійності
+    def validate(self, data):
+        # 1. Викликаємо стандартну валідацію (паролі, пошта тощо)
+        validated_data = super().validate(data)
+
+        # 2. Витягуємо токен каптчі
+        captcha_token = data.get('captcha_token')
+        request = self.context.get('request')
+
+        if not captcha_token:
+            raise serializers.ValidationError(t_msg('invalid_captcha', request))
+
+        # 3. Перевіряємо токен через Google API
+        secret_key = settings.RECAPTCHA_SECRET_KEY
+        verify_url = 'https://www.google.com/recaptcha/api/siteverify'
+
+        payload = {
+            'secret': secret_key,
+            'response': captcha_token
+        }
+
+        try:
+            response = requests.post(verify_url, data=payload)
+            result = response.json()
+
+            if not result.get('success'):
+                raise serializers.ValidationError(t_msg('invalid_captcha', request))
+        except requests.exceptions.RequestException:
+            raise serializers.ValidationError(t_msg('captcha_conn_err', request))
+
+        # 4. Якщо все добре, повертаємо дані (але без токена, бо в базу його зберігати не треба)
+        validated_data.pop('captcha_token', None)
+        return validated_data
 
     def get_cleaned_data(self):
         data = super().get_cleaned_data()
@@ -111,16 +159,21 @@ class CustomUserDetailsSerializer(UserDetailsSerializer):
     # поле для інвентарю
     inventory = UserIngredientSerializer(many=True, read_only=True)
 
+    has_usable_password = serializers.SerializerMethodField()
+
     class Meta(UserDetailsSerializer.Meta):
         model = CustomUser
         fields = ('pk', 'email', 'first_name', 'avatar', 'dietary_preferences', 'allergies', 'favorite_cuisines',
-                  'is_staff', 'is_superuser', 'favorites_count', 'inventory')
-        read_only_fields = ('email', 'is_staff', 'is_superuser', 'favorites_count', 'inventory')
+                  'is_staff', 'is_superuser', 'favorites_count', 'inventory', 'has_usable_password')
+        read_only_fields = ('email', 'is_staff', 'is_superuser', 'favorites_count', 'inventory', 'has_usable_password')
 
     # Метод, який рахує кількість улюблених рецептів
     def get_favorites_count(self, obj):
         # Звертаємося до related_name 'favorites' з моделі FavoriteRecipe
         return obj.favorites.count()
+
+    def get_has_usable_password(self, obj):
+        return obj.has_usable_password()
 
 
 class CustomPasswordResetSerializer(PasswordResetSerializer):

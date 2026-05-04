@@ -485,6 +485,50 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
                     have_amount = inventory_dict[(ing_id, 'pcs')] * avg_weight
                     has_any_amount = True
                     inv_display_unit = 'pcs'
+                    # ==========================================
+
+                    # === СУПЕР МАГІЯ: Часточки/Скибочки (slice) <-> Штуки (pcs) ===
+                elif unit == 'slice' and (ing_id, 'pcs') in inventory_dict:
+                    avg_slices = 8  # Наприклад, 1 лимон = 8 часточок
+                    name_check = ing_name.lower()
+                    if 'хліб' in name_check or 'bread' in name_check or 'chleb' in name_check:
+                        avg_slices = 15  # 1 буханка хліба = 15 скибочок
+
+                    # Переводимо цілі штуки з холодильника у часточки
+                    have_amount = inventory_dict[(ing_id, 'pcs')] * avg_slices
+                    has_any_amount = True
+                    inv_display_unit = 'pcs'
+
+                elif unit == 'pcs' and (ing_id, 'slice') in inventory_dict:
+                    avg_slices = 8
+                    name_check = ing_name.lower()
+                    if 'хліб' in name_check or 'bread' in name_check or 'chleb' in name_check:
+                        avg_slices = 15
+
+                    have_amount = inventory_dict[(ing_id, 'slice')] / avg_slices
+                    has_any_amount = True
+                    inv_display_unit = 'slice'
+
+                # === СУПЕР МАГІЯ 2: Часточки/Скибочки (slice) <-> Грами (g) ===
+                elif unit == 'slice' and (ing_id, 'g') in inventory_dict:
+                    slice_weight = 15  # 1 часточка лимона ~ 15г
+                    name_check = ing_name.lower()
+                    if 'хліб' in name_check or 'bread' in name_check or 'chleb' in name_check:
+                        slice_weight = 30  # 1 скибка хліба ~ 30г
+
+                    have_amount = inventory_dict[(ing_id, 'g')] / slice_weight
+                    has_any_amount = True
+                    inv_display_unit = 'g'
+
+                elif unit == 'g' and (ing_id, 'slice') in inventory_dict:
+                    slice_weight = 15
+                    name_check = ing_name.lower()
+                    if 'хліб' in name_check or 'bread' in name_check or 'chleb' in name_check:
+                        slice_weight = 30
+
+                    have_amount = inventory_dict[(ing_id, 'slice')] * slice_weight
+                    has_any_amount = True
+                    inv_display_unit = 'slice'
                 # ==========================================
 
                 # МАГІЯ ДЛЯ "ЗА СМАКОМ" (taste) ТА "ДРІБОК" (pinch)

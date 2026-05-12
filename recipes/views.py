@@ -368,7 +368,7 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
         from .models.recipe import RecipeIngredient
         from users.models import UserIngredient
 
-        # === ФІКС: Отримуємо поточну мову з фронтенду ===
+        # === Отримуємо поточну мову з фронтенду ===
         lang = getattr(request, 'LANGUAGE_CODE', 'uk')[:2] if request else 'uk'
 
         # Додаємо вибірку name_en та name_pl з бази
@@ -403,7 +403,7 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
             if not ing_id:
                 continue
 
-            # === ФІКС: Визначаємо назву інгредієнта залежно від обраної мови ===
+            # === Визначаємо назву інгредієнта залежно від обраної мови ===
             ing_name = req['recipe__recipe_ingredients__ingredient__name']
             if lang == 'en' and req['recipe__recipe_ingredients__ingredient__name_en']:
                 ing_name = req['recipe__recipe_ingredients__ingredient__name_en']

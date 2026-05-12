@@ -465,6 +465,10 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
                         avg_weight = 100
                     elif 'часник' in name_check or 'garlic' in name_check or 'czosnek' in name_check:
                         avg_weight = 5  # Зубчик часнику
+                    elif 'лавровий лист' in name_check or 'bay leaf' in name_check or 'liść laurowy' in name_check:
+                        avg_weight = 0.5
+                    elif 'апельсин' in name_check or 'orange' in name_check or 'pomarańcz' in name_check:
+                        avg_weight = 200
 
                     # Переводимо грами з холодильника в штуки
                     have_amount = inventory_dict[(ing_id, 'g')] / avg_weight
@@ -480,6 +484,10 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
                         avg_weight = 100
                     elif 'часник' in name_check or 'garlic' in name_check or 'czosnek' in name_check:
                         avg_weight = 5
+                    elif 'лавровий лист' in name_check or 'bay leaf' in name_check or 'liść laurowy' in name_check:
+                        avg_weight = 0.5
+                    elif 'апельсин' in name_check or 'orange' in name_check or 'pomarańcz' in name_check:
+                        avg_weight = 200
 
                     # Переводимо штуки з холодильника в грами
                     have_amount = inventory_dict[(ing_id, 'pcs')] * avg_weight

@@ -75,6 +75,8 @@ EXACT_UNIT_MATCH = {
     'Авокадо': ['pcs', 'g', 'kg'], 'Avocado': ['pcs', 'g', 'kg'], 'Awokado': ['pcs', 'g', 'kg'],
     'Банан': ['pcs', 'g'], 'Banana': ['pcs', 'g'], 'Banan': ['pcs', 'g'],
     'Часник': ['clove', 'g'], 'Garlic': ['clove', 'g'], 'Czosnek': ['clove', 'g'],
+    'Апельсин': ['pcs', 'g', 'kg'], 'Orange': ['pcs', 'g', 'kg'], 'Pomarańcza': ['pcs', 'g', 'kg'],
+    'Персик': ['pcs', 'g', 'kg'], 'Peach': ['pcs', 'g', 'kg'], 'Brzoskwinia': ['pcs', 'g', 'kg'],
     'Вода': ['ml', 'l'], 'Water': ['ml', 'l'], 'Woda': ['ml', 'l'],
     'Бульйон': ['ml', 'l'], 'Broth': ['ml', 'l'], 'Bulion': ['ml', 'l'],
     'Овочевий бульйон': ['ml', 'l'], 'Vegetable broth': ['ml', 'l'], 'Bulion warzywny': ['ml', 'l'],
@@ -89,8 +91,9 @@ EXACT_UNIT_MATCH = {
     'Темний шоколад': ['g', 'pcs'], 'Dark chocolate': ['g', 'pcs'], 'Ciemna czekolada': ['g', 'pcs'],
     'Розпушувач': ['g', 'tsp'], 'Baking powder': ['g', 'tsp'], 'Proszek do pieczenia': ['g', 'tsp'],
     'Желатин': ['g', 'tsp'], 'Gelatin': ['g', 'tsp'], 'Żelatyna': ['g', 'tsp'],
-    'мед': ['g', 'kg', 'tsp', 'tbsp', 'ml', 'l'], 'honey': ['g', 'kg', 'tsp', 'tbsp', 'ml', 'l'], 'miód': ['g', 'kg', 'tsp', 'tbsp', 'ml', 'l'],
-    'мигдальне молоко': ['ml', 'l'], 'almond milk': ['ml', 'l'], 'mleko migdałowe': ['ml', 'l'],
+    'Мед': ['g', 'kg', 'tsp', 'tbsp', 'ml', 'l'], 'honey': ['g', 'kg', 'tsp', 'tbsp', 'ml', 'l'], 'miód': ['g', 'kg', 'tsp', 'tbsp', 'ml', 'l'],
+    'Мигдальне молоко': ['ml', 'l'], 'almond milk': ['ml', 'l'], 'mleko migdałowe': ['ml', 'l'],
+    'Лавровий лист': ['pcs', 'g', 'kg'], 'Bay leaf': ['pcs', 'g', 'kg'], 'Liść laurowy': ['pcs', 'g', 'kg'],
 }
 
 class Ingredient(models.Model):

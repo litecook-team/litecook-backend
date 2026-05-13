@@ -203,7 +203,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         qs = Recipe.objects.annotate(likes_count=Count('favorited_by')).all()
 
         # АВТОМАТИЧНА ФІЛЬТРАЦІЯ ЗА ПРОФІЛЕМ КОРИСТУВАЧА
-        if self.request.user.is_authenticated:
+        # Якщо це прямий перехід за посиланням (retrieve) — віддаємо рецепт у будь-якому випадку!
+        if self.request.user.is_authenticated and self.action != 'retrieve':
             user = self.request.user
 
             # 1. Приховуємо рецепти, що містять алергени користувача (БЕЗПЕКА)

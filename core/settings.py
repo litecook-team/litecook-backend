@@ -311,3 +311,7 @@ PASSWORD_RESET_TIMEOUT = 3600
 # Час життя посилання для підтвердження електронної пошти (в днях).
 # 1 день - оптимально для безпеки і зручності
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
+
+# Ліміти для завантаження великих PDF-файлів (20 МБ)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 50971520
+FILE_UPLOAD_MAX_MEMORY_SIZE = 50971520

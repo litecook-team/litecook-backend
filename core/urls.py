@@ -33,8 +33,8 @@ def react_app_view(request, recipe_id=None):
     Віддає React-додаток (index.html) з динамічними Open Graph тегами.
     """
     # Шлях до зібраного React index.html.
-    # Замініть 'dist' на вашу папку з фронтендом, якщо вона називається інакше
-    index_file_path = os.path.join(settings.BASE_DIR, 'dist', 'index.html')
+    frontend_dir = os.path.join(settings.BASE_DIR.parent, 'frontend')  # Якщо frontend і backend на одному рівні
+    index_file_path = os.path.join(frontend_dir, 'index.html')
 
     try:
         with open(index_file_path, 'r', encoding='utf-8') as f:

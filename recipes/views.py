@@ -369,10 +369,8 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
         from .models.recipe import RecipeIngredient
         from users.models import UserIngredient
 
-        # === Отримуємо поточну мову з фронтенду ===
         lang = getattr(request, 'LANGUAGE_CODE', 'uk')[:2] if request else 'uk'
 
-        # Додаємо вибірку name_en та name_pl з бази
         raw_required = menus.values(
             'recipe__recipe_ingredients__ingredient_id',
             'recipe__recipe_ingredients__ingredient__name',
@@ -381,7 +379,8 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
             'recipe__recipe_ingredients__unit',
             'recipe__recipe_ingredients__ingredient__image'
         ).annotate(
-            total_required=Sum('recipe__recipe_ingredients__amount')
+            total_required=Sum('recipe__recipe_ingredients__amount'),
+            recipe_count=Count('recipe', distinct=True)
         )
 
         def normalize_unit(amount, unit):
@@ -389,9 +388,9 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
             amount = float(amount)
             if unit == 'kg': return amount * 1000, 'g'
             if unit == 'l': return amount * 1000, 'ml'
-            if unit == 'glass': return amount * 200, 'ml'
-            if unit == 'tbsp': return amount * 15, 'ml'
-            if unit == 'tsp': return amount * 5, 'ml'
+            if unit == 'glass': return amount * 200, 'g'
+            if unit == 'tbsp': return amount * 15, 'g'
+            if unit == 'tsp': return amount * 5, 'g'
             if unit == 'drop': return amount * 0.05, 'ml'
             if unit == 'bunch': return amount * 40, 'g'
             if unit == 'sprig': return amount * 2, 'g'
@@ -404,7 +403,6 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
             if not ing_id:
                 continue
 
-            # === Визначаємо назву інгредієнта залежно від обраної мови ===
             ing_name = req['recipe__recipe_ingredients__ingredient__name']
             if lang == 'en' and req['recipe__recipe_ingredients__ingredient__name_en']:
                 ing_name = req['recipe__recipe_ingredients__ingredient__name_en']
@@ -412,70 +410,118 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
                 ing_name = req['recipe__recipe_ingredients__ingredient__name_pl']
 
             image = req['recipe__recipe_ingredients__ingredient__image']
-
             amount, unit = normalize_unit(req['total_required'], req['recipe__recipe_ingredients__unit'])
+            rcount = req['recipe_count']
 
-            key = (ing_id, ing_name, unit, image)
-            if key not in merged_requirements:
-                merged_requirements[key] = amount
+            if ing_id not in merged_requirements:
+                merged_requirements[ing_id] = {
+                    'name': ing_name,
+                    'image': image,
+                    'amount': 0,
+                    'unit': None,
+                    'has_concrete': False,
+                    'abstract_count': 0,
+                    'abstract_unit_type': None
+                }
+
+            existing = merged_requirements[ing_id]
+
+            if amount is None or unit in ['taste', 'pinch', 'garnish', 'frying']:
+                existing['abstract_count'] += rcount
+                if not existing['abstract_unit_type']:
+                    existing['abstract_unit_type'] = unit if unit else 'taste'
             else:
-                if amount is not None and merged_requirements[key] is not None:
-                    merged_requirements[key] += amount
+                if not existing['has_concrete']:
+                    existing['amount'] = amount
+                    existing['unit'] = unit
+                    existing['has_concrete'] = True
+                else:
+                    name_check = ing_name.lower()
+
+                    def get_g_weight(amt, un):
+                        if un in ['g', 'ml']: return amt
+                        if un == 'pcs':
+                            w = 150
+                            if 'яйц' in name_check or 'egg' in name_check or 'jajk' in name_check:
+                                w = 50
+                            elif 'лимон' in name_check or 'lemon' in name_check or 'cytryna' in name_check:
+                                w = 100
+                            elif 'часник' in name_check or 'garlic' in name_check or 'czosnek' in name_check:
+                                w = 5
+                            elif 'лавровий лист' in name_check or 'bay leaf' in name_check or 'liść laurowy' in name_check:
+                                w = 0.5
+                            elif 'апельсин' in name_check or 'orange' in name_check or 'pomarańcz' in name_check:
+                                w = 200
+                            return amt * w
+                        if un == 'slice':
+                            w = 15
+                            if 'хліб' in name_check or 'bread' in name_check or 'chleb' in name_check: w = 30
+                            return amt * w
+                        return amt
+
+                    amt1_g = get_g_weight(existing['amount'], existing['unit'])
+                    amt2_g = get_g_weight(amount, unit)
+
+                    existing['amount'] = amt1_g + amt2_g
+                    existing['unit'] = 'ml' if existing['unit'] == 'ml' or unit == 'ml' else 'g'
 
         user_inventory = UserIngredient.objects.filter(user=request.user)
         inventory_dict = {}
         for item in user_inventory:
-            # Нормалізуємо кількість і одиницю для ХОЛОДИЛЬНИКА
             amount, unit = normalize_unit(item.amount, item.unit)
             if amount is not None:
                 key = (item.ingredient_id, unit)
                 inventory_dict[key] = inventory_dict.get(key, 0) + amount
 
         final_list = []
-        for (ing_id, ing_name, unit, image), total_req in merged_requirements.items():
+        for ing_id, data in merged_requirements.items():
+            ing_name = data['name']
+            has_concrete = data['has_concrete']
+            unit = data['unit'] if has_concrete else data['abstract_unit_type']
+            image = data['image']
+            total_req = data['amount'] if has_concrete else None
 
             have_amount = 0
-            has_any_amount = False  # Додаємо прапорець, чи є хоч щось в холодильнику
-            inv_display_unit = unit  # За замовчуванням одиниця залишку така ж, як у рецепті
+            has_any_amount = False
+            inv_display_unit = unit
+
+            # ДОДАНО: Справжня вага в холодильнику (для лимона)
+            actual_fridge_amount = 0
 
             if use_fridge:
-                # Шукаємо точний збіг (наприклад, pcs і pcs, або ml і ml)
                 if (ing_id, unit) in inventory_dict:
-                    have_amount = inventory_dict[(ing_id, unit)]
+                    actual_fridge_amount = inventory_dict[(ing_id, unit)]
+                    have_amount = actual_fridge_amount
                     has_any_amount = True
                     inv_display_unit = unit
-
-                # КУЛІНАРНА МАГІЯ: Об'єм <-> Вага
                 elif unit == 'ml' and (ing_id, 'g') in inventory_dict:
-                    have_amount = inventory_dict[(ing_id, 'g')]
+                    actual_fridge_amount = inventory_dict[(ing_id, 'g')]
+                    have_amount = actual_fridge_amount
                     has_any_amount = True
                     inv_display_unit = 'g'
-
                 elif unit == 'g' and (ing_id, 'ml') in inventory_dict:
-                    have_amount = inventory_dict[(ing_id, 'ml')]
+                    actual_fridge_amount = inventory_dict[(ing_id, 'ml')]
+                    have_amount = actual_fridge_amount
                     has_any_amount = True
                     inv_display_unit = 'ml'
-
-                # === НОВА МАГІЯ: Штуки <-> Вага (Грами) ===
                 elif unit == 'pcs' and (ing_id, 'g') in inventory_dict:
-                    avg_weight = 150  # Дефолт для фруктів/овочів (Авокадо, Банан)
+                    avg_weight = 150
                     name_check = ing_name.lower()
                     if 'яйц' in name_check or 'egg' in name_check or 'jajk' in name_check:
                         avg_weight = 50
                     elif 'лимон' in name_check or 'lemon' in name_check or 'cytryna' in name_check:
                         avg_weight = 100
                     elif 'часник' in name_check or 'garlic' in name_check or 'czosnek' in name_check:
-                        avg_weight = 5  # Зубчик часнику
+                        avg_weight = 5
                     elif 'лавровий лист' in name_check or 'bay leaf' in name_check or 'liść laurowy' in name_check:
                         avg_weight = 0.5
                     elif 'апельсин' in name_check or 'orange' in name_check or 'pomarańcz' in name_check:
                         avg_weight = 200
 
-                    # Переводимо грами з холодильника в штуки
-                    have_amount = inventory_dict[(ing_id, 'g')] / avg_weight
+                    actual_fridge_amount = inventory_dict[(ing_id, 'g')]
+                    have_amount = actual_fridge_amount / avg_weight
                     has_any_amount = True
                     inv_display_unit = 'g'
-
                 elif unit == 'g' and (ing_id, 'pcs') in inventory_dict:
                     avg_weight = 150
                     name_check = ing_name.lower()
@@ -490,99 +536,108 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
                     elif 'апельсин' in name_check or 'orange' in name_check or 'pomarańcz' in name_check:
                         avg_weight = 200
 
-                    # Переводимо штуки з холодильника в грами
-                    have_amount = inventory_dict[(ing_id, 'pcs')] * avg_weight
+                    actual_fridge_amount = inventory_dict[(ing_id, 'pcs')]
+                    have_amount = actual_fridge_amount * avg_weight
                     has_any_amount = True
                     inv_display_unit = 'pcs'
-                    # ==========================================
-
-                    # === СУПЕР МАГІЯ: Часточки/Скибочки (slice) <-> Штуки (pcs) ===
                 elif unit == 'slice' and (ing_id, 'pcs') in inventory_dict:
-                    avg_slices = 8  # Наприклад, 1 лимон = 8 часточок
+                    avg_slices = 8
                     name_check = ing_name.lower()
-                    if 'хліб' in name_check or 'bread' in name_check or 'chleb' in name_check:
-                        avg_slices = 15  # 1 буханка хліба = 15 скибочок
+                    if 'хліб' in name_check or 'bread' in name_check or 'chleb' in name_check: avg_slices = 15
 
-                    # Переводимо цілі штуки з холодильника у часточки
-                    have_amount = inventory_dict[(ing_id, 'pcs')] * avg_slices
+                    actual_fridge_amount = inventory_dict[(ing_id, 'pcs')]
+                    have_amount = actual_fridge_amount * avg_slices
                     has_any_amount = True
                     inv_display_unit = 'pcs'
-
                 elif unit == 'pcs' and (ing_id, 'slice') in inventory_dict:
                     avg_slices = 8
                     name_check = ing_name.lower()
-                    if 'хліб' in name_check or 'bread' in name_check or 'chleb' in name_check:
-                        avg_slices = 15
+                    if 'хліб' in name_check or 'bread' in name_check or 'chleb' in name_check: avg_slices = 15
 
-                    have_amount = inventory_dict[(ing_id, 'slice')] / avg_slices
+                    actual_fridge_amount = inventory_dict[(ing_id, 'slice')]
+                    have_amount = actual_fridge_amount / avg_slices
                     has_any_amount = True
                     inv_display_unit = 'slice'
-
-                # === СУПЕР МАГІЯ 2: Часточки/Скибочки (slice) <-> Грами (g) ===
                 elif unit == 'slice' and (ing_id, 'g') in inventory_dict:
-                    slice_weight = 15  # 1 часточка лимона ~ 15г
+                    slice_weight = 15
                     name_check = ing_name.lower()
-                    if 'хліб' in name_check or 'bread' in name_check or 'chleb' in name_check:
-                        slice_weight = 30  # 1 скибка хліба ~ 30г
+                    if 'хліб' in name_check or 'bread' in name_check or 'chleb' in name_check: slice_weight = 30
 
-                    have_amount = inventory_dict[(ing_id, 'g')] / slice_weight
+                    actual_fridge_amount = inventory_dict[(ing_id, 'g')]
+                    have_amount = actual_fridge_amount / slice_weight
                     has_any_amount = True
                     inv_display_unit = 'g'
-
                 elif unit == 'g' and (ing_id, 'slice') in inventory_dict:
                     slice_weight = 15
                     name_check = ing_name.lower()
-                    if 'хліб' in name_check or 'bread' in name_check or 'chleb' in name_check:
-                        slice_weight = 30
+                    if 'хліб' in name_check or 'bread' in name_check or 'chleb' in name_check: slice_weight = 30
 
-                    have_amount = inventory_dict[(ing_id, 'slice')] * slice_weight
+                    actual_fridge_amount = inventory_dict[(ing_id, 'slice')]
+                    have_amount = actual_fridge_amount * slice_weight
                     has_any_amount = True
                     inv_display_unit = 'slice'
-                # ==========================================
-
-                # МАГІЯ ДЛЯ "ЗА СМАКОМ" (taste) ТА "ДРІБОК" (pinch)
                 elif unit in ['taste', 'pinch']:
                     for (inv_ing_id, inv_unit), inv_amount in inventory_dict.items():
                         if inv_ing_id == ing_id and inv_amount > 0:
+                            actual_fridge_amount = inv_amount
                             has_any_amount = True
                             have_amount = inv_amount
-                            inv_display_unit = inv_unit  # ВАЖЛИВО: ловимо реальні грами/мл з холодильника!
+                            inv_display_unit = inv_unit
                             break
 
-            # ================= РОЗРАХУНОК "ЩО КУПИТИ" =================
             display_unit = unit
+            to_buy_concrete = 0
+            needed_abstract_count = data['abstract_count']
 
-            # Якщо рецепт просить "За смаком" (None)
-            if total_req is None:
-                # ПОРІГ БЕЗПЕКИ: вважаємо, що продукту достатньо, ТІЛЬКИ якщо його >= 15 грамів/мл
-                is_enough_for_taste = has_any_amount and have_amount >= 70
+            # ДОДАНО: Правильний залишок з холодильника
+            original_have_amount = actual_fridge_amount
+            remaining_fridge = actual_fridge_amount
 
-                if is_enough_for_taste:
-                    # Вистачає з головою - повністю приховуємо
-                    to_buy_base = 0
-                    display_amount = 0
-                else:
-                    # Занадто мало (або зовсім немає) - треба купити.
-                    # Ставимо 1, щоб пройшло фільтр, але display_amount = None для напису "за смаком"
-                    to_buy_base = 1
-                    display_amount = None
+            # 1. Обробляємо конкретні грами
+            if has_concrete:
+                to_buy_concrete = max(0, total_req - have_amount)
+                # Віднімаємо від холодильника те, що пішло на конкретні грами
+                if has_any_amount and have_amount > 0:
+                    ratio = min(total_req / have_amount, 1.0)
+                    remaining_fridge = actual_fridge_amount * (1.0 - ratio)
+
+            # 2. Обробляємо абстрактні одиниці ("за смаком")
+            if needed_abstract_count > 0:
+                threshold = 15 * needed_abstract_count
+                if has_any_amount and remaining_fridge >= threshold:
+                    needed_abstract_count = 0  # Перекрили холодильником!
+
+            # 3. ВИЗНАЧАЄМО, ЩО ВІДПРАВЛЯТИ НА ФРОНТЕНД ДЛЯ ВІДОБРАЖЕННЯ
+            if has_concrete and to_buy_concrete == 0 and needed_abstract_count > 0:
+                display_req = None
+                display_have = remaining_fridge  # Показуємо тільки залишок!
             else:
-                # Стандартний математичний розрахунок для звичайних одиниць
-                to_buy_base = max(0, total_req - have_amount)
-                display_amount = to_buy_base
+                display_req = total_req if has_concrete else None
+                display_have = original_have_amount if has_any_amount else 0
 
-            # Зворотна конвертація для красивого виводу (якщо вийшло більше 1000 г, покажемо в кг)
-            if display_amount is not None and display_amount > 0:
-                if unit == 'g' and display_amount >= 1000:
-                    display_amount, display_unit = display_amount / 1000.0, 'kg'
-                elif unit == 'ml' and display_amount >= 1000:
-                    display_amount, display_unit = display_amount / 1000.0, 'l'
+            # Товар закритий повністю?
+            is_fully_stocked = False
+            if has_concrete and to_buy_concrete == 0 and needed_abstract_count == 0:
+                is_fully_stocked = True
+            elif not has_concrete and needed_abstract_count == 0:
+                is_fully_stocked = True
 
-                # Прибираємо зайві нулі після коми (наприклад, 1.0 -> 1)
-                if display_amount == int(display_amount):
-                    display_amount = int(display_amount)
-                else:
-                    display_amount = round(display_amount, 2)
+            # Магія форматування ваги
+            if display_req is not None and display_req > 0:
+                if display_unit == 'g' and display_req >= 1000:
+                    display_req, display_unit = display_req / 1000.0, 'kg'
+                elif display_unit == 'ml' and display_req >= 1000:
+                    display_req, display_unit = display_req / 1000.0, 'l'
+
+                display_req = int(display_req) if display_req == int(display_req) else round(display_req, 2)
+
+            if display_have > 0:
+                if inv_display_unit == 'g' and display_have >= 1000:
+                    display_have, inv_display_unit = display_have / 1000.0, 'kg'
+                elif inv_display_unit == 'ml' and display_have >= 1000:
+                    display_have, inv_display_unit = display_have / 1000.0, 'l'
+
+                display_have = int(display_have) if display_have == int(display_have) else round(display_have, 2)
 
             final_list.append({
                 'ingredient_id': ing_id,
@@ -591,14 +646,14 @@ class WeeklyMenuViewSet(viewsets.ModelViewSet):
                 'unit': display_unit,
                 'inventory_unit': inv_display_unit,
                 'required_amount': total_req,
-                'already_have': have_amount,
-                'to_buy': display_amount,
-                # is_fully_stocked тепер враховує і "за смаком"
-                'is_fully_stocked': to_buy_base == 0,
-                '_sort_weight': to_buy_base
+                'already_have': display_have,
+                'to_buy': display_req,
+                'abstract_count': needed_abstract_count,
+                'abstract_unit': data['abstract_unit_type'] or 'taste',
+                'is_fully_stocked': is_fully_stocked,
+                '_sort_weight': to_buy_concrete + (1 if needed_abstract_count > 0 else 0)
             })
 
-        # Спочатку ті продукти, які треба купити
         final_list.sort(key=lambda x: (x['_sort_weight'] > 0, x['_sort_weight']), reverse=True)
         for item in final_list: item.pop('_sort_weight', None)
 
